@@ -198,15 +198,6 @@ async def update_participation_time(id_user, participation_time):
 	profile = Profiles.query.filter_by(id_user=id_user).first()
 	profile.participation_time = participation_time
 	db.session.commit()
-
-@app.route('/get_full_img_chapter', methods=['GET', 'POST'])
-async def get_full_img_chapter():
-    link_chapter = request.form.get("link-chapter")
-    chapters = ListChapter.query.filter_by(id_chapter=link_chapter).first()
-    list_link_img = chapters.list_image_chapter_server_goc.split(',')
-    dict_link_img = dict()
-    dict_link_img['list_img'] = list_link_img
-    return dict_link_img
 	
 @app.route("/")
 async def get_home():
@@ -434,3 +425,11 @@ async def get_home():
 				   Comedy_Comics=data_comedy_comics, Free_Comics=data_free_comics, Cooming_Soon_Comics=data_cooming_soon_comics,
 				   Recommended_Comics=data_recommended_comics, Recent_Comics=data_recent_comics, New_Release_Comics=data_new_release_comics)
 
+@app.route('/get_full_img_chapter', methods=['GET', 'POST'])
+async def get_full_img_chapter():
+    link_chapter = request.form.get("link-chapter")
+    chapters = ListChapter.query.filter_by(id_chapter=link_chapter).first()
+    list_link_img = chapters.list_image_chapter_server_goc.split(',')
+    dict_link_img = dict()
+    dict_link_img['list_img'] = list_link_img
+    return dict_link_img
