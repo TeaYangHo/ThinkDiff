@@ -313,39 +313,47 @@ async def get_home():
 	for comedy_comic in comedy_comics:
 		print(comedy_comic.so_luong_view)
 		print(comedy_comic.id_manga)
+
 		chapter_new = ListChapter.query.filter_by(id_manga=comedy_comic.id_manga).order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		data = {
-			"id_manga": comedy_comic.id_manga,
-			"title_manga": comedy_comic.title_manga,
-			"image_poster_link_goc": comedy_comic.link_image_poster_link_goc,
-			"so_luong_view": comedy_comic.so_luong_view,
-			"list_categories": comedy_comic.list_categories,
-			"rate": comedy_comic.rate,
-			"author": comedy_comic.tac_gia,
-			"chapter_new": chapter_new.chapter,
-			"id_chapter": chapter_new.id_chapter,
-			"time_release": comedy_comic.time_release,
-		}
-		data_comedy_comics.append(data)
+		if chapter_new is not None:
+			data = {
+				"id_manga": comedy_comic.id_manga,
+				"title_manga": comedy_comic.title_manga,
+				"image_poster_link_goc": comedy_comic.link_image_poster_link_goc,
+				"so_luong_view": comedy_comic.so_luong_view,
+				"list_categories": comedy_comic.list_categories,
+				"rate": comedy_comic.rate,
+				"author": comedy_comic.tac_gia,
+				"chapter_new": chapter_new.chapter,
+				"id_chapter": chapter_new.id_chapter,
+				"time_release": comedy_comic.time_release,
+			}
+			data_comedy_comics.append(data)
+		else:
+			continue
 
 	#FREE COMICS
 	data_free_comics = []
 	free_comics = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
 	for free_comic in free_comics:
 		chapter_new = ListChapter.query.filter_by(id_manga=free_comic.id_manga).order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		data = {
-			"id_manga": free_comic.id_manga,
-			"title_manga": free_comic.title_manga,
-			"image_poster_link_goc": free_comic.link_image_poster_link_goc,
-			"so_luong_view": free_comic.so_luong_view,
-			"list_categories": free_comic.list_categories,
-			"rate": free_comic.rate,
-			"author": free_comic.tac_gia,
-			"chapter_new": chapter_new.chapter,
-			"id_chapter": chapter_new.id_chapter,
-			"time_release": free_comic.time_release,
-		}
-		data_free_comics.append(data)
+		if chapter_new is not None:
+			data = {
+				"id_manga": free_comic.id_manga,
+				"title_manga": free_comic.title_manga,
+				"image_poster_link_goc": free_comic.link_image_poster_link_goc,
+				"so_luong_view": free_comic.so_luong_view,
+				"list_categories": free_comic.list_categories,
+				"rate": free_comic.rate,
+				"author": free_comic.tac_gia,
+				"chapter_new": chapter_new.chapter,
+				"id_chapter": chapter_new.id_chapter,
+				"time_release": free_comic.time_release,
+			}
+			data_free_comics.append(data)
+		else:
+			continue
+		
 
 	#COOMING SOON COMICS
 	data_cooming_soon_comics = []
@@ -367,19 +375,23 @@ async def get_home():
 	for recommended_comic in recommended_comics:
 		chapter_new = ListChapter.query.filter_by(id_manga=recommended_comic.id_manga)\
 			.order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		data = {
-			"id_manga": recommended_comic.id_manga,
-			"title_manga": recommended_comic.title_manga,
-			"image_poster_link_goc": recommended_comic.link_image_poster_link_goc,
-			"so_luong_view": recommended_comic.so_luong_view,
-			"list_categories": recommended_comic.list_categories,
-			"rate": recommended_comic.rate,
-			"author": recommended_comic.tac_gia,
-			"chapter_new": chapter_new.chapter,
-			"id_chapter": chapter_new.id_chapter,
-			"time_release": recommended_comic.time_release,
-		}
-		data_recommended_comics.append(data)
+		if chapter_new is not None:
+			data = {
+				"id_manga": recommended_comic.id_manga,
+				"title_manga": recommended_comic.title_manga,
+				"image_poster_link_goc": recommended_comic.link_image_poster_link_goc,
+				"so_luong_view": recommended_comic.so_luong_view,
+				"list_categories": recommended_comic.list_categories,
+				"rate": recommended_comic.rate,
+				"author": recommended_comic.tac_gia,
+				"chapter_new": chapter_new.chapter,
+				"id_chapter": chapter_new.id_chapter,
+				"time_release": recommended_comic.time_release,
+			}
+			data_recommended_comics.append(data)
+		else:
+			continue
+		
 
 	#RECENT COMICS
 	data_recent_comics = []
@@ -387,39 +399,47 @@ async def get_home():
 	for recent_comic in recent_comics:
 		chapter_new = ListChapter.query.filter_by(id_manga=recent_comic.id_manga)\
 			.order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		data = {
-			"id_manga": recent_comic.id_manga,
-			"title_manga": recent_comic.title_manga,
-			"image_poster_link_goc": recent_comic.link_image_poster_link_goc,
-			"so_luong_view": recent_comic.so_luong_view,
-			"list_categories": recent_comic.list_categories,
-			"rate": recent_comic.rate,
-			"author": recent_comic.tac_gia,
-			"chapter_new": chapter_new.chapter,
-			"id_chapter": chapter_new.id_chapter,
-			"time_release": recent_comic.time_release,
-		}
-		data_recent_comics.append(data)
+		if chapter_new is not None:
+			data = {
+				"id_manga": recent_comic.id_manga,
+				"title_manga": recent_comic.title_manga,
+				"image_poster_link_goc": recent_comic.link_image_poster_link_goc,
+				"so_luong_view": recent_comic.so_luong_view,
+				"list_categories": recent_comic.list_categories,
+				"rate": recent_comic.rate,
+				"author": recent_comic.tac_gia,
+				"chapter_new": chapter_new.chapter,
+				"id_chapter": chapter_new.id_chapter,
+				"time_release": recent_comic.time_release,
+			}
+			data_recent_comics.append(data)
 
+		else:
+			continue
+		
 	#NEW RELEASE COMICS
 	data_new_release_comics = []
 	new_release_comics = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
 	for new_release_comic in new_release_comics:
 		chapter_new = ListChapter.query.filter_by(id_manga=new_release_comic.id_manga)\
 			.order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		data = {
-			"id_manga": new_release_comic.id_manga,
-			"title_manga": new_release_comic.title_manga,
-			"image_poster_link_goc": new_release_comic.link_image_poster_link_goc,
-			"so_luong_view": new_release_comic.so_luong_view,
-			"list_categories": new_release_comic.list_categories,
-			"rate": new_release_comic.rate,
-			"author": new_release_comic.tac_gia,
-			"chapter_new": chapter_new.chapter,
-			"id_chapter": chapter_new.id_chapter,
-			"time_release": new_release_comic.time_release,
-		}
-		data_new_release_comics.append(data)
+		if chapter_new is not None:
+			data = {
+				"id_manga": new_release_comic.id_manga,
+				"title_manga": new_release_comic.title_manga,
+				"image_poster_link_goc": new_release_comic.link_image_poster_link_goc,
+				"so_luong_view": new_release_comic.so_luong_view,
+				"list_categories": new_release_comic.list_categories,
+				"rate": new_release_comic.rate,
+				"author": new_release_comic.tac_gia,
+				"chapter_new": chapter_new.chapter,
+				"id_chapter": chapter_new.id_chapter,
+				"time_release": new_release_comic.time_release,
+			}
+			data_new_release_comics.append(data)
+		else:
+			continue
+		
 
 
 	return jsonify(User_New=data_user, Anime_Manga_News=data_news, Reviews_Manga=data_reviews_manga, Reviews_Anime=data_reviews_anime,
