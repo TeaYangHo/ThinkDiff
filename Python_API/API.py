@@ -311,9 +311,6 @@ async def get_home():
 	comedy_comics = ListManga.query.filter(ListManga.list_categories.like('%Comedy%'))\
 		.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
 	for comedy_comic in comedy_comics:
-		print(comedy_comic.so_luong_view)
-		print(comedy_comic.id_manga)
-
 		chapter_new = ListChapter.query.filter_by(id_manga=comedy_comic.id_manga).order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
 		if chapter_new is not None:
 			data = {
