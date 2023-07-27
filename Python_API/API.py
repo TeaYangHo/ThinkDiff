@@ -4,7 +4,7 @@ from main import *
 async def load_user(user_id):
 	return Users.query.get(int(user_id))
 
-async def send_async_email(msg):
+def send_async_email(msg):
 	with app.app_context():
 		mail.send(msg)
 
@@ -198,7 +198,7 @@ async def update_participation_time(id_user, participation_time):
 	profile = Profiles.query.filter_by(id_user=id_user).first()
 	profile.participation_time = participation_time
 	db.session.commit()
-	
+
 @app.route("/")
 async def get_home():
 	users = Users.query.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").desc()).limit(20).all()
@@ -206,7 +206,7 @@ async def get_home():
 		id_user = user.id_user
 		time_reg = user.time_register
 		participation_time = convert_time(time_reg)
-		update_participation_time(id_user, participation_time)
+		await update_participation_time(id_user, participation_time)
 
 	users_new = Profiles.query.join(Users, Profiles.id_user == Users.id_user)\
 		.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").asc()).limit(50).all()
@@ -309,8 +309,10 @@ async def get_home():
 	#COMEDY COMMICS
 	data_comedy_comics = []
 	comedy_comics = ListManga.query.filter(ListManga.list_categories.like('%Comedy%'))\
-		.order_by(func.STR_TO_DATE(ListManga.time_release, "%H:%i:%s %d/%c/%Y").desc()).limit(50).all()
+		.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
 	for comedy_comic in comedy_comics:
+		print(comedy_comic.so_luong_view)
+		print(comedy_comic.id_manga)
 		chapter_new = ListChapter.query.filter_by(id_manga=comedy_comic.id_manga).order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
 		data = {
 			"id_manga": comedy_comic.id_manga,
@@ -421,15 +423,16 @@ async def get_home():
 
 
 	return jsonify(User_New=data_user, Anime_Manga_News=data_news, Reviews_Manga=data_reviews_manga, Reviews_Anime=data_reviews_anime,
-				   Rank_Manga_Week=data_rank_manga_week, Rank_Manga_Month=data_rank_manga_month, Rank_Manga_Year=data_rank_manga_year,
+				   Rank_Comics_Week=data_rank_manga_week, Rank_Comics_Month=data_rank_manga_month, Rank_Comics_Year=data_rank_manga_year,
 				   Comedy_Comics=data_comedy_comics, Free_Comics=data_free_comics, Cooming_Soon_Comics=data_cooming_soon_comics,
 				   Recommended_Comics=data_recommended_comics, Recent_Comics=data_recent_comics, New_Release_Comics=data_new_release_comics)
 
+
 @app.route('/get_full_img_chapter', methods=['GET', 'POST'])
 async def get_full_img_chapter():
-    link_chapter = request.form.get("link-chapter")
-    chapters = ListChapter.query.filter_by(id_chapter=link_chapter).first()
-    list_link_img = chapters.list_image_chapter_server_goc.split(',')
-    dict_link_img = dict()
-    dict_link_img['list_img'] = list_link_img
-    return dict_link_img
+	link_chapter = request.form.get("link-chapter")
+	chapters = ListChapter.query.filter_by(id_chapter=link_chapter).first()
+	list_link_img = chapters.list_image_chapter_server_goc.split(',')
+	dict_link_img = dict()
+	dict_link_img['list_img'] = list_link_img
+	return dict_link_img
