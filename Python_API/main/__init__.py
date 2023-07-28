@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from flask_cors import CORS
 from flask_mail import *
 from threading import Thread
-import uuid, os
+import uuid, os, asyncio
 
 
 app = Flask(__name__)
@@ -19,10 +19,10 @@ CORS(app)
 app.secret_key = "2458001357900"
 app.config["SECURITY_PASSWORD_SALT"] = "2458001357900"
 app.config["JWT_SECRET_KEY"] = "2458001357900"
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:mcso%40123#%40!@localhost/MANGASOCIAL"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:@localhost/MANGASOCIAL"
 app.config["SQLALCHEMY_BINDS"] = {
-    "MYANIMELIST": "mysql://root:mcso%40123#%40!@localhost/MYANIMELIST",
-	"MANGASYSTEM": "mysql://root:mcso%40123#%40!@localhost/MANGASYSTEM"
+    "MYANIMELIST": "mysql://root:@localhost/MYANIMELIST",
+	"MANGASYSTEM": "mysql://root:@localhost/MANGASYSTEM"
 }
 
 app.config["SQLAlCHEMY_TRACK_MODIFICATIONS"] = False
