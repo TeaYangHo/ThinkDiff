@@ -1,7 +1,9 @@
 from main import *
+from main.home import user_new, anime_manga_news, reviews_manga, reviews_anime, rank_manga_week, rank_manga_month, rank_manga_year
+from main.home import comedy_comics, free_comics, cooming_soon_comics, recommended_comics, recent_comics, new_release_comics
 
 @login_manager.user_loader
-async def load_user(user_id):
+def load_user(user_id):
 	return Users.query.get(int(user_id))
 
 def send_async_email(msg):
@@ -15,7 +17,7 @@ async def register():
 		if form.validate_on_submit():
 			account = Users.query.filter_by(email=form.email.data).first()
 			if account:
-				return jsonify(message="Account already exists!")
+				return jsonify(message="Account already exists!"), 400
 			else:
 				data = {"email": form.email.data, "password": form.password.data}
 				token = secret.dumps(data, salt=app.config["SECURITY_PASSWORD_SALT"])
@@ -24,7 +26,7 @@ async def register():
 				msg.body = "Your confirmation link is " + confirm_url
 				thr = Thread(target=send_async_email, args=[msg])
 				thr.start()
-				return jsonify(message="Please check your email or spam", account={"email": form.email.data})
+				return jsonify(message="Please check your email or spam", account={"email": form.email.data}), 200
 	return jsonify(errors=form.errors)
 
 
@@ -65,9 +67,9 @@ async def login():
 						account={"id_user": account.id_user, "email": account.email, "password": account.password,
 								"jwt": access_token})
 			else:
-				return jsonify(message="Incorrect password!")
+				return jsonify(message="Incorrect password!"), 400
 		else:
-			return jsonify(message="Account does not exist!")
+			return jsonify(message="Account does not exist!"), 404
 	return jsonify(errors=form.errors)
 
 @app.route("/logout", methods=["GET", "POST"])
@@ -77,7 +79,7 @@ async def logout():
 	return jsonify(message=f"Sign out successful!")
 
 @app.route("/user/<id_user>")
-async def user(id_user):
+def user(id_user):
 	profile = Profiles.query.filter_by(id_user=id_user).first()
 	if profile:
 		account = Users.query.filter_by(id_user=id_user).first()
@@ -100,12 +102,13 @@ async def user(id_user):
 				"introduction": profiles.introduction
 				})
 	else:
-		return jsonify(message="User does not exist")
+		return jsonify(message="User does not exist"), 404
 
-@app.route("/user/<id_user>/setting", methods=["PATCH"])
+@app.route("/user/setting", methods=["PATCH"])
 @login_required
-async def user_setting(id_user):
+async def user_setting():
 	form = UserSettingForm()
+	id_user = current_user.id_user
 	profile_user = Profiles.query.get_or_404(id_user)
 	if form.validate_on_submit():
 		profile_user.name_user = form.name_user.data
@@ -130,12 +133,12 @@ async def user_setting_password():
 		new_password = form.new_password.data
 		confirm_password = form.confirm_password.data
 
-		account = Users.query.filter_by(id_user=current_user.id_user).first()
-		print(account.email)
+		id_user = current_user.id_user
+		account = Users.query.get_or_404(id_user)
 
 		is_password_correct = check_password_hash(account.password, current_password)
 		if not is_password_correct:
-			return jsonify(message="Incorrect current password")
+			return jsonify(message="Incorrect current password"), 400
 		else:
 			data = {"current_password": current_password, "new_password": new_password,
 							"confirm_password": confirm_password, "id_user": account.id_user}
@@ -145,8 +148,8 @@ async def user_setting_password():
 			msg.body = "Your confirmation link is " + confirm_url
 			thr = Thread(target=send_async_email, args=[msg])
 			thr.start()
-			return jsonify(message="Please check your email or spam", account={"email": account.email})
-	return jsonify(errors=form.errors)
+			return jsonify(message="Please check your email or spam", account={"email": account.email}), 200
+	return jsonify(errors=form.errors), 400
 
 @app.route("/setting/password/confirm/<token>")
 async def setting_password_confirm(token):
@@ -178,9 +181,10 @@ async def forgot_password():
 			msg.body = "Your confirmation link is " + confirm_url
 			thr = Thread(target=send_async_email, args=[msg])
 			thr.start()
-			return jsonify(message="Please check your email or spam", account={"email": account.email})
+			return jsonify(message="Please check your email or spam", account={"email": account.email}), 200
 		else:
-			return jsonify(message="Account does not exist")
+			return jsonify(message="Account does not exist"), 404
+	return jsonify(error=form.errors), 400
 
 @app.route("/forgot-password/confirm/<token>")
 async def forgot_password_confirm(token):
@@ -194,259 +198,33 @@ async def forgot_password_confirm(token):
 	db.session.commit()
 	return {"message": "Confirm successfully. Try to login"}
 
-async def update_participation_time(id_user, participation_time):
-	profile = Profiles.query.filter_by(id_user=id_user).first()
-	profile.participation_time = participation_time
-	db.session.commit()
 
 @app.route("/")
 async def get_home():
-	users = Users.query.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").desc()).limit(20).all()
-	for user in users:
-		id_user = user.id_user
-		time_reg = user.time_register
-		participation_time = convert_time(time_reg)
-		await update_participation_time(id_user, participation_time)
+	data_user, data_news, data_reviews_manga, data_reviews_anime, data_rank_manga_week, data_rank_manga_month,\
+	data_rank_manga_year, data_comedy_comics, data_free_comics, data_cooming_soon_comics, data_recommended_comics, \
+	data_recent_comics, data_new_release_comics \
+	= await asyncio.gather(user_new(), anime_manga_news(), reviews_manga(), reviews_anime(), rank_manga_week(), rank_manga_month(),
+							rank_manga_year(), comedy_comics(), free_comics(), cooming_soon_comics(), recommended_comics(),
+							recent_comics(), new_release_comics())
 
-	users_new = Profiles.query.join(Users, Profiles.id_user == Users.id_user)\
-		.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").asc()).limit(50).all()
-
-	data_user = []
-	for user_new in users_new:
-		data = {
-			"id_user": user_new.id_user,
-			"name_user": user_new.name_user,
-			"avatar_user": user_new.avatar_user,
-			"participation_time": user_new.participation_time
-		}
-		data_user.append(data)
-		
-	data_news = []
-	news = Anime_Manga_News.query.order_by(func.STR_TO_DATE(Anime_Manga_News.time_news, "%b %d, %h:%i %p").desc()).limit(50).all()
-	for new in news:
-		data = {
-			"idNews": new.idNews,
-			"time_news": new.time_news,
-			"category": new.category,
-			"title_news": new.title_news,
-			"profile_user_post": new.profile_user_post,
-			"images_poster": new.images_poster,
-			"descript_pro": new.descript_pro,
-			"number_comment": new.number_comment
-		}
-		data_news.append(data)
-
-	#REVIEWS MANGA
-	data_reviews_manga = []
-	reviews_manga = Reviews_Manga.query.order_by(func.STR_TO_DATE(Reviews_Manga.time_review, "%b %d, %Y").desc()).limit(50).all()
-	for review in reviews_manga:
-		data = {
-			"idReview": review.idReview,
-			"noi_dung": review.noi_dung,
-			"link_manga": review.link_manga,
-			"link_avatar_user_comment": review.link_avatar_user_comment,
-			"link_user": review.link_user,
-			"time_review": review.time_review
-		}
-		data_reviews_manga.append(data)
-
-	# REVIEWS ANIME
-	data_reviews_anime = []
-	reviews_manga = Reviews_Anime.query.order_by(func.STR_TO_DATE(Reviews_Anime.time_review, "%b %d, %Y").desc()).limit(50).all()
-	for review in reviews_manga:
-		data = {
-			"idReview": review.idReview,
-			"noi_dung": review.noi_dung,
-			"link_anime": review.link_anime,
-			"link_avatar_user_comment": review.link_avatar_user_comment,
-			"link_user": review.link_user,
-			"time_review": review.time_review
-		}
-		data_reviews_anime.append(data)
-
-	#RANK WEEK
-	data_rank_manga_week = []
-	rank_manga_week = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for rank in rank_manga_week:
-		data = {
-			"id_manga": rank.id_manga,
-			"title_manga": rank.title_manga,
-			"image_poster_link_goc": rank.link_image_poster_link_goc,
-			"so_luong_view": rank.so_luong_view,
-			"list_categories": rank.list_categories,
-			"author": rank.tac_gia
-		}
-		data_rank_manga_week.append(data)
-
-	#RANK MONTH
-	data_rank_manga_month = []
-	rank_manga_month = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for rank in rank_manga_month:
-		data = {
-			"id_manga": rank.id_manga,
-			"title_manga": rank.title_manga,
-			"image_poster_link_goc": rank.link_image_poster_link_goc,
-			"so_luong_view": rank.so_luong_view,
-			"list_categories": rank.list_categories,
-			"author": rank.tac_gia
-		}
-		data_rank_manga_month.append(data)
-
-	#RANK YEAR
-	data_rank_manga_year = []
-	rank_manga_year = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all() # Views is digits
-	for rank in rank_manga_year:
-		data = {
-			"id_manga": rank.id_manga,
-			"title_manga": rank.title_manga,
-			"image_poster_link_goc": rank.link_image_poster_link_goc,
-			"so_luong_view": rank.so_luong_view,
-			"list_categories": rank.list_categories,
-			"author": rank.tac_gia
-		}
-		data_rank_manga_year.append(data)
-
-	#COMEDY COMMICS
-	data_comedy_comics = []
-	comedy_comics = ListManga.query.filter(ListManga.list_categories.like('%Comedy%'))\
-		.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for comedy_comic in comedy_comics:
-		chapter_new = ListChapter.query.filter_by(id_manga=comedy_comic.id_manga).order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		if chapter_new is not None:
-			data = {
-				"id_manga": comedy_comic.id_manga,
-				"title_manga": comedy_comic.title_manga,
-				"image_poster_link_goc": comedy_comic.link_image_poster_link_goc,
-				"so_luong_view": comedy_comic.so_luong_view,
-				"list_categories": comedy_comic.list_categories,
-				"rate": comedy_comic.rate,
-				"author": comedy_comic.tac_gia,
-				"chapter_new": chapter_new.chapter,
-				"id_chapter": chapter_new.id_chapter,
-				"time_release": comedy_comic.time_release,
-			}
-			data_comedy_comics.append(data)
-		else:
-			continue
-
-	#FREE COMICS
-	data_free_comics = []
-	free_comics = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for free_comic in free_comics:
-		chapter_new = ListChapter.query.filter_by(id_manga=free_comic.id_manga).order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		if chapter_new is not None:
-			data = {
-				"id_manga": free_comic.id_manga,
-				"title_manga": free_comic.title_manga,
-				"image_poster_link_goc": free_comic.link_image_poster_link_goc,
-				"so_luong_view": free_comic.so_luong_view,
-				"list_categories": free_comic.list_categories,
-				"rate": free_comic.rate,
-				"author": free_comic.tac_gia,
-				"chapter_new": chapter_new.chapter,
-				"id_chapter": chapter_new.id_chapter,
-				"time_release": free_comic.time_release,
-			}
-			data_free_comics.append(data)
-		else:
-			continue
-		
-
-	#COOMING SOON COMICS
-	data_cooming_soon_comics = []
-	cooming_soon_comics = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for cooming_soon_comic in cooming_soon_comics:
-		data = {
-			"id_manga": cooming_soon_comic.id_manga,
-			"title_manga": cooming_soon_comic.title_manga,
-			"image_poster": cooming_soon_comic.link_image_poster_link_goc,
-			"list_categories": cooming_soon_comic.list_categories,
-			"author": cooming_soon_comic.tac_gia,
-			"release_date": cooming_soon_comic.time_release,
-		}
-		data_cooming_soon_comics.append(data)
-
-	#RECOMMENDED COMICS
-	data_recommended_comics = []
-	recommended_comics = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for recommended_comic in recommended_comics:
-		chapter_new = ListChapter.query.filter_by(id_manga=recommended_comic.id_manga)\
-			.order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		if chapter_new is not None:
-			data = {
-				"id_manga": recommended_comic.id_manga,
-				"title_manga": recommended_comic.title_manga,
-				"image_poster_link_goc": recommended_comic.link_image_poster_link_goc,
-				"so_luong_view": recommended_comic.so_luong_view,
-				"list_categories": recommended_comic.list_categories,
-				"rate": recommended_comic.rate,
-				"author": recommended_comic.tac_gia,
-				"chapter_new": chapter_new.chapter,
-				"id_chapter": chapter_new.id_chapter,
-				"time_release": recommended_comic.time_release,
-			}
-			data_recommended_comics.append(data)
-		else:
-			continue
-		
-
-	#RECENT COMICS
-	data_recent_comics = []
-	recent_comics = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for recent_comic in recent_comics:
-		chapter_new = ListChapter.query.filter_by(id_manga=recent_comic.id_manga)\
-			.order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		if chapter_new is not None:
-			data = {
-				"id_manga": recent_comic.id_manga,
-				"title_manga": recent_comic.title_manga,
-				"image_poster_link_goc": recent_comic.link_image_poster_link_goc,
-				"so_luong_view": recent_comic.so_luong_view,
-				"list_categories": recent_comic.list_categories,
-				"rate": recent_comic.rate,
-				"author": recent_comic.tac_gia,
-				"chapter_new": chapter_new.chapter,
-				"id_chapter": chapter_new.id_chapter,
-				"time_release": recent_comic.time_release,
-			}
-			data_recent_comics.append(data)
-
-		else:
-			continue
-		
-	#NEW RELEASE COMICS
-	data_new_release_comics = []
-	new_release_comics = ListManga.query.order_by(cast(ListManga.so_luong_view, Integer).desc()).limit(50).all()
-	for new_release_comic in new_release_comics:
-		chapter_new = ListChapter.query.filter_by(id_manga=new_release_comic.id_manga)\
-			.order_by(func.STR_TO_DATE(ListChapter.thoi_gian_release, "%B %d, %Y").desc()).first()
-		if chapter_new is not None:
-			data = {
-				"id_manga": new_release_comic.id_manga,
-				"title_manga": new_release_comic.title_manga,
-				"image_poster_link_goc": new_release_comic.link_image_poster_link_goc,
-				"so_luong_view": new_release_comic.so_luong_view,
-				"list_categories": new_release_comic.list_categories,
-				"rate": new_release_comic.rate,
-				"author": new_release_comic.tac_gia,
-				"chapter_new": chapter_new.chapter,
-				"id_chapter": chapter_new.id_chapter,
-				"time_release": new_release_comic.time_release,
-			}
-			data_new_release_comics.append(data)
-		else:
-			continue
-		
-
-
-	return jsonify(User_New=data_user, Anime_Manga_News=data_news, Reviews_Manga=data_reviews_manga, Reviews_Anime=data_reviews_anime,
-				   Rank_Comics_Week=data_rank_manga_week, Rank_Comics_Month=data_rank_manga_month, Rank_Comics_Year=data_rank_manga_year,
-				   Comedy_Comics=data_comedy_comics, Free_Comics=data_free_comics, Cooming_Soon_Comics=data_cooming_soon_comics,
-				   Recommended_Comics=data_recommended_comics, Recent_Comics=data_recent_comics, New_Release_Comics=data_new_release_comics)
+	return jsonify(User_New=data_user,
+				Anime_Manga_News=data_news,
+				Reviews_Manga=data_reviews_manga,
+				Reviews_Anime=data_reviews_anime,
+				Rank_Comics_Week=data_rank_manga_week,
+				Rank_Comics_Month=data_rank_manga_month,
+				Rank_Comics_Year=data_rank_manga_year,
+				Comedy_Comics=data_comedy_comics,
+				Free_Comics=data_free_comics,
+				Cooming_Soon_Comics=data_cooming_soon_comics,
+				Recommended_Comics=data_recommended_comics,
+				Recent_Comics=data_recent_comics,
+				New_Release_Comics=data_new_release_comics)
 
 
 @app.route('/get_full_img_chapter', methods=['GET', 'POST'])
-async def get_full_img_chapter():
+def get_full_img_chapter():
 	link_chapter = request.form.get("link-chapter")
 	chapters = ListChapter.query.filter_by(id_chapter=link_chapter).first()
 	list_link_img = chapters.list_image_chapter_server_goc.split(',')
