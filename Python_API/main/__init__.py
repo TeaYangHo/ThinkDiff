@@ -19,10 +19,10 @@ CORS(app)
 app.secret_key = "2458001357900"
 app.config["SECURITY_PASSWORD_SALT"] = "2458001357900"
 app.config["JWT_SECRET_KEY"] = "2458001357900"
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:@localhost/MANGASOCIAL"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:mcso%40123#%40!@localhost/MANGASOCIAL"
 app.config["SQLALCHEMY_BINDS"] = {
-    "MYANIMELIST": "mysql://root:@localhost/MYANIMELIST",
-	"MANGASYSTEM": "mysql://root:@localhost/MANGASYSTEM"
+    "MYANIMELIST": "mysql://root:mcso%40123#%40!@localhost/MYANIMELIST",
+	"MANGASYSTEM": "mysql://root:mcso%40123#%40!@localhost/MANGASYSTEM"
 }
 
 app.config["SQLAlCHEMY_TRACK_MODIFICATIONS"] = False
