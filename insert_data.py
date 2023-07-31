@@ -8,7 +8,7 @@ async def insertMangaIntoTable(id_manga, title_manga, descript_manga, poster_upl
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_insert_with_param = """
-		REPLACE INTO LISTMANGA
+		REPLACE INTO List_Manga
 		(id_manga, title_manga, descript_manga, poster_upload, poster_goc, 
 		link_detail_manga, list_categories, list_chapter, rate, views, status, author, id_server) 
 		VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
@@ -32,7 +32,7 @@ async def insert_New_Manga_Information_IntoTable(id_manga, title_manga, poster, 
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_insert_with_param = """
-		INSERT INTO Manga_Information_New
+		INSERT INTO Manga_Update
 		(id_manga, title_manga, poster, rate) 
 		VALUES (%s, %s, %s, %s);
 		"""
@@ -88,7 +88,7 @@ async def insertChapterIntoTable(id_chapter, title_chapter, id_manga, list_image
 
 	try:
 		sqlite_insert_with_param = """
-		INSERT INTO LISTCHAPTER
+		INSERT INTO List_Chapter
 		(id_chapter, title_chapter, id_manga, list_image_chapter_da_upload, list_image_chapter_server_goc, time_release)
 		VALUES (%s, %s, %s, %s, %s, %s);
 		"""
@@ -105,12 +105,12 @@ async def insertChapterIntoTable(id_chapter, title_chapter, id_manga, list_image
 			connect_mysql.close()
 			print("The SQLite connection is closed")
 
-async def update_New_Manga_Information_IntoTable(id_manga, id_chapter, title_chapter, time_release):
+async def update_Manga_Into_Table(id_manga, id_chapter, title_chapter, time_release):
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_update_with_param = """
-		UPDATE Manga_Information_New
+		UPDATE Manga_Update
 		SET id_chapter = %s, title_chapter = %s, time_release = %s
 		WHERE id_manga = %s;
 		"""
@@ -139,7 +139,7 @@ async def start_insert_list_chapter(_LINK_DATA_CHAPTER):
 		list_image_chapter_server_goc = chapter["list_image_chapter_server_goc"]
 		time_release = chapter["thoi_gian_release"]
 		await insertChapterIntoTable(id_chapter, title_chapter, id_manga, list_image_chapter_da_upload, list_image_chapter_server_goc, time_release)
-		await update_New_Manga_Information_IntoTable(id_manga, id_chapter, title_chapter, time_release)
+		await update_Manga_Into_Table(id_manga, id_chapter, title_chapter, time_release)
 
 		print(len(data) - len(data) + i)
 		if i % 1000 == 0:
