@@ -4,7 +4,7 @@ import mysql.connector
 async def insertMangaIntoTable(id_manga, title_manga, descript_manga, poster_upload, poster_goc,
 							   link_detail_manga, list_categories, list_chapter, rate, views, status, author,
 							   id_server):
-	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database"MANGASYSTEM")
+	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_insert_with_param = """
@@ -28,7 +28,7 @@ async def insertMangaIntoTable(id_manga, title_manga, descript_manga, poster_upl
 
 
 async def insert_New_Manga_Information_IntoTable(id_manga, title_manga, poster, rate):
-	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database"MANGASYSTEM")
+	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_insert_with_param = """
