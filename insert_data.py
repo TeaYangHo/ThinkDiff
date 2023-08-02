@@ -95,17 +95,17 @@ async def start_insert_list_manga(_LINK_DATA_MANGA):
 		i += 1
 	print("Done")
 
-async def insert_Chapter_Into_Table(id_chapter, path_segment_chapter, id_manga, time_release):
+async def insert_Chapter_Into_Table(id_chapter, title_chapter, path_segment_chapter, id_manga, time_release):
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 
 	try:
 		mysql_insert_with_param = """
 		INSERT INTO List_Chapter
-		(id_chapter, path_segment_chapter, id_manga, time_release)
-		VALUES (%s, %s, %s, %s);
+		(id_chapter, title_chapter, path_segment_chapter, id_manga, time_release)
+		VALUES (%s, %s, %s, %s, %s);
 		"""
-		data_tuple = (id_chapter, path_segment_chapter, id_manga, time_release)
+		data_tuple = (id_chapter, title_chapter, path_segment_chapter, id_manga, time_release)
 		cursor.execute(mysql_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted chapter successfully data into table. {id_chapter}")
@@ -139,16 +139,18 @@ async def insert_Image_Chapter_Into_Table(path_segment, id_chapter, image_chapte
 			connect_mysql.close()
 			print("The mysql connection is closed")
 			
-async def update_Manga_Into_Table(id_manga, id_chapter, path_segment, time_release, views_week, views_month, views):
+async def update_Manga_Into_Table(id_manga, id_chapter, title_chapter, path_segment, time_release,
+								  views_week, views_month, views):
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		mysql_update_with_param = """
 		UPDATE Manga_Update
-		SET id_chapter = %s, path_segment = %s, time_release = %s, views_week = %s, views_month = %s, views = %s
+		SET id_chapter = %s, title_chapter = %s, path_segment = %s, time_release = %s, 
+			views_week = %s, views_month = %s, views = %s
 		WHERE id_manga = %s;
 		"""
-		data_tuple = (id_chapter, path_segment, time_release, views_week, views_month, views, id_manga)
+		data_tuple = (id_chapter, title_chapter, path_segment, time_release, views_week, views_month, views, id_manga)
 		cursor.execute(mysql_update_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Update chapter successfully data into table. {id_chapter}")
@@ -167,6 +169,7 @@ async def start_insert_list_chapter(_LINK_DATA_CHAPTER):
 	i = 1
 	for chapter in data:
 		id_chapter = chapter["id_chapter"]
+		title_chapter = "Chapter ..."
 		path_segment_chapter = conver_url(chapter["id_chapter"])
 		id_manga = chapter["id_manga"]
 		path_segment_manga = conver_url(chapter['id_manga'])
@@ -182,9 +185,10 @@ async def start_insert_list_chapter(_LINK_DATA_CHAPTER):
 		views_month = random_4
 		views = random_5
 
-		await insert_Chapter_Into_Table(id_chapter, path_segment_chapter, id_manga, time_release)
+		await insert_Chapter_Into_Table(id_chapter, title_chapter, path_segment_chapter, id_manga, time_release)
 		await insert_Image_Chapter_Into_Table(path_segment, id_chapter, image_chapter_upload, image_chapter_original)
-		await update_Manga_Into_Table(id_manga, id_chapter, path_segment, time_release, views_week, views_month, views)
+		await update_Manga_Into_Table(id_manga, id_chapter, title_chapter, path_segment, time_release,
+									  views_week, views_month, views)
 
 		print(len(data) - len(data) + i)
 		if i % 1000 == 0:
