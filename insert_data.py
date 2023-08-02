@@ -1,20 +1,30 @@
-import asyncio, json
+import asyncio, json, random
 import mysql.connector
 
-async def insertMangaIntoTable(id_manga, title_manga, descript_manga, poster_upload, poster_goc,
-							   link_detail_manga, list_categories, list_chapter, rate, views, status, author,
-							   id_server):
-	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database="MANGASYSTEM")
+def conver_url(url):
+	if url.endswith(".html"):
+		result = url.split("/")[-1].replace(".html", "")
+	elif url.endswith("/"):
+		result = url.split("/")[-2]
+	elif url.endswith("/all-pages"):
+		result = url.split("/")[-2]
+	else:
+		result = url.split("/")[-1]
+	return result
+
+async def insertMangaIntoTable(id_manga, path_segment_manga, title_manga, descript_manga, poster_upload, poster_original,
+							detail_manga, categories, chapters, rate, views_original, status, author, id_server):
+	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, db="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_insert_with_param = """
 		REPLACE INTO List_Manga
-		(id_manga, title_manga, descript_manga, poster_upload, poster_goc, 
-		link_detail_manga, list_categories, list_chapter, rate, views, status, author, id_server) 
-		VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+		(id_manga, path_segment_manga, title_manga, descript_manga, poster_upload, poster_original,
+							detail_manga, categories, chapters, rate, views_original, status, author, id_server) 
+		VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
 		"""
-		data_tuple = (id_manga, title_manga, descript_manga, poster_upload, poster_goc,
-					  link_detail_manga, list_categories, list_chapter, rate, views, status, author, id_server)
+		data_tuple = (id_manga, path_segment_manga, title_manga, descript_manga, poster_upload, poster_original,
+							detail_manga, categories, chapters, rate, views_original, status, author, id_server)
 		cursor.execute(sqlite_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted manga successfully data into table. {id_manga}")
@@ -27,16 +37,16 @@ async def insertMangaIntoTable(id_manga, title_manga, descript_manga, poster_upl
 			print("The SQLite connection is closed")
 
 
-async def insert_New_Manga_Information_IntoTable(id_manga, title_manga, poster, rate):
-	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database="MANGASYSTEM")
+async def insert_Manga_Update_Into_Table(id_manga, path_segment_manga, title_manga, poster, categories, rate):
+	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, db="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_insert_with_param = """
 		INSERT INTO Manga_Update
-		(id_manga, title_manga, poster, rate) 
-		VALUES (%s, %s, %s, %s);
+		(id_manga, path_segment_manga, title_manga, poster, categories, rate) 
+		VALUES (%s, %s, %s, %s, %s, %s);
 		"""
-		data_tuple = (id_manga, title_manga, poster, rate)
+		data_tuple = (id_manga, path_segment_manga, title_manga, poster, categories, rate)
 		cursor.execute(sqlite_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted manga successfully data into table. {id_manga}")
@@ -55,72 +65,98 @@ async def start_insert_list_manga(_LINK_DATA_MANGA):
 	i = 1
 	for manga in data:
 		id_manga = manga['ID_Manga']
+		path_segment_manga = conver_url(manga['ID_Manga'])
 		title_manga = manga['Title_Manga']
 		descript_manga = manga['DescriptManga']
 		poster_upload = manga['LinkImagePoster_link_Upload']
-		poster_goc = manga['LinkImagePoster_linkgoc']
-		link_detail_manga = manga['Link_Detail_Manga']
-		list_categories = manga['ListCategories']
-		list_chapter = manga['ListChapter']
+		poster_original = manga['LinkImagePoster_linkgoc']
+		detail_manga = manga['Link_Detail_Manga']
+		categories = manga['ListCategories']
+		chapters = manga['ListChapter']
 		rate = manga['Rate']
-		views = manga['SoLuongView']
+		views_original = manga['SoLuongView']
 		status = manga['Status']
 		author = manga['Tac_Gia']
 		id_server = manga['id_Server']
-		await insertMangaIntoTable(id_manga, title_manga, descript_manga, poster_upload, poster_goc,
-								   link_detail_manga, list_categories, list_chapter, rate, views, status, author,
-								   id_server)
 
-		await insert_New_Manga_Information_IntoTable(id_manga, title_manga, poster_goc, rate)
+		if id_server not in ("https://www.novelhall.com", "https://bestlightnovel.com/"):
+
+			await insertMangaIntoTable(id_manga, path_segment_manga, title_manga, descript_manga, poster_upload, poster_original,
+							detail_manga, categories, chapters, rate, views_original, status, author, id_server)
+
+			await insert_Manga_Update_Into_Table(id_manga, path_segment_manga, title_manga, poster_original, categories, rate)
+		else:
+			print("Novel")
+
+		print(len(data) - len(data) + i)
 		if i % 1000 == 0:
 			print("Wait 15s")
 			await asyncio.sleep(15)
-
-
-		print(len(data) - len(data) + i)
 		i += 1
 	print("Done")
 
-async def insertChapterIntoTable(id_chapter, title_chapter, id_manga, list_image_chapter_da_upload, list_image_chapter_server_goc,
-																time_release):
-	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database="MANGASYSTEM")
+async def insert_Chapter_Into_Table(id_chapter, path_segment_chapter, id_manga, time_release):
+	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 
 	try:
 		sqlite_insert_with_param = """
 		INSERT INTO List_Chapter
-		(id_chapter, title_chapter, id_manga, list_image_chapter_da_upload, list_image_chapter_server_goc, time_release)
-		VALUES (%s, %s, %s, %s, %s, %s);
+		(id_chapter, path_segment_chapter, id_manga, time_release)
+		VALUES (%s, %s, %s, %s);
 		"""
-		data_tuple = (
-		id_chapter, title_chapter, id_manga, list_image_chapter_da_upload, list_image_chapter_server_goc, time_release)
+		data_tuple = (id_chapter, path_segment_chapter, id_manga, time_release)
 		cursor.execute(sqlite_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted chapter successfully data into table. {id_chapter}")
 		cursor.close()
 	except mysql.connector.Error as error:
-		print("Failed to insert Python variable into sqlite table", error)
+		print(f"Failed to insert Python variable into sqlite table. {id_chapter}", error)
 	finally:
 		if connect_mysql:
 			connect_mysql.close()
 			print("The SQLite connection is closed")
 
-async def update_Manga_Into_Table(id_manga, id_chapter, title_chapter, time_release):
-	connect_mysql = mysql.connector.connect(host="localhost", user="root", password="mcso@123#@!", database="MANGASYSTEM")
+async def insert_Image_Chapter_Into_Table(path_segment, id_chapter, image_chapter_upload, image_chapter_original):
+	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
+	cursor = connect_mysql.cursor()
+
+	try:
+		sqlite_insert_with_param = """
+		INSERT INTO Imaga_Chapter
+		(path_segment, id_chapter, image_chapter_upload, image_chapter_original)
+		VALUES (%s, %s, %s, %s);
+		"""
+		data_tuple = (path_segment, id_chapter, image_chapter_upload, image_chapter_original)
+		cursor.execute(sqlite_insert_with_param, data_tuple)
+		connect_mysql.commit()
+		print(f"Inserted image chapter successfully data into table. {id_chapter}")
+		cursor.close()
+	except mysql.connector.Error as error:
+		print(f"Failed to insert Python variable into sqlite table. {id_chapter}", error)
+	finally:
+		if connect_mysql:
+			connect_mysql.close()
+			print("The SQLite connection is closed")
+			
+async def update_Manga_Into_Table(id_manga, id_chapter, path_segment_chapter, path_segment, time_release,
+								  views_week, views_month, views):
+	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_update_with_param = """
 		UPDATE Manga_Update
-		SET id_chapter = %s, title_chapter = %s, time_release = %s
+		SET id_chapter = %s, path_segment_chapter = %s, path_segment = %s, time_release = %s, 
+			views_week = %s, views_month = %s, views = %s
 		WHERE id_manga = %s;
 		"""
-		data_tuple = (id_chapter, title_chapter, time_release, id_manga)
+		data_tuple = (id_chapter, path_segment_chapter, path_segment, time_release, views_week, views_month, views, id_manga)
 		cursor.execute(sqlite_update_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Update chapter successfully data into table. {id_chapter}")
 		cursor.close()
 	except mysql.connector.Error as error:
-		print("Failed to Update Python variable into sqlite table", error)
+		print(f"Failed to Update Python variable into sqlite table. {id_chapter}", error)
 	finally:
 		if connect_mysql:
 			connect_mysql.close()
@@ -133,26 +169,41 @@ async def start_insert_list_chapter(_LINK_DATA_CHAPTER):
 	i = 1
 	for chapter in data:
 		id_chapter = chapter["id_chapter"]
-		title_chapter = "Chapter ..."
+		path_segment_chapter = conver_url(chapter["id_chapter"])
 		id_manga = chapter["id_manga"]
-		list_image_chapter_da_upload = chapter["list_image_chapter_da_upload"]
-		list_image_chapter_server_goc = chapter["list_image_chapter_server_goc"]
+		path_segment_manga = conver_url(chapter['id_manga'])
+		path_segment = f"{path_segment_chapter}-{path_segment_manga}"
+		image_chapter_upload = chapter["list_image_chapter_da_upload"]
+		image_chapter_original = chapter["list_image_chapter_server_goc"]
 		time_release = chapter["thoi_gian_release"]
-		await insertChapterIntoTable(id_chapter, title_chapter, id_manga, list_image_chapter_da_upload, list_image_chapter_server_goc, time_release)
-		await update_Manga_Into_Table(id_manga, id_chapter, title_chapter, time_release)
+
+		random_3 = random.randint(100, 999)
+		random_4 = random.randint(1000, 9999)
+		random_5 = random.randint(10000, 99999)
+		views_week = random_3
+		views_month = random_4
+		views = random_5
+
+		await insert_Chapter_Into_Table(id_chapter, path_segment_chapter, id_manga, time_release)
+		await insert_Image_Chapter_Into_Table(path_segment, id_chapter, image_chapter_upload, image_chapter_original)
+		await update_Manga_Into_Table(id_manga, id_chapter, path_segment_chapter, path_segment, time_release,
+										views_week, views_month, views)
 
 		print(len(data) - len(data) + i)
 		if i % 1000 == 0:
 			print("Wait 15s")
 			await asyncio.sleep(15)
 		i += 1
-
 	print("Done")
-
+	
 async def start():
-	_LINK_DATA_MANGA = fr"/root/son/mangareader/truyen-tranh/manga-system/ListManga.json"
-	_LINK_DATA_CHAPTER = r"/root/son/mangareader/truyen-tranh/manga-system/ListChapter.json "
+	# _LINK_DATA_MANGA = r"/mnt/d/Code Python/ThinkDiff/mysql_anime_manga/data/ListManga.json"
+	# _LINK_DATA_CHAPTER = r"/mnt/d/Code Python/ThinkDiff/mysql_anime_manga/data/sssssCopy.json"
+	_LINK_DATA_MANGA = r"/root/son/mangareader/truyen-tranh/manga-system/ListManga.json"
+	_LINK_DATA_CHAPTER = r"/root/son/mangareader/truyen-tranh/manga-system/ListChapter.json"
 	await start_insert_list_manga(_LINK_DATA_MANGA)
 	await start_insert_list_chapter(_LINK_DATA_CHAPTER)
 
+#password = ""
+password = "mcso@123#@!"
 asyncio.run(start())
