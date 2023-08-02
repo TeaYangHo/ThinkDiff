@@ -139,18 +139,16 @@ async def insert_Image_Chapter_Into_Table(path_segment, id_chapter, image_chapte
 			connect_mysql.close()
 			print("The SQLite connection is closed")
 			
-async def update_Manga_Into_Table(id_manga, id_chapter, path_segment_chapter, path_segment, time_release,
-								  views_week, views_month, views):
+async def update_Manga_Into_Table(id_manga, id_chapter, path_segment, time_release, views_week, views_month, views):
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
 		sqlite_update_with_param = """
 		UPDATE Manga_Update
-		SET id_chapter = %s, path_segment_chapter = %s, path_segment = %s, time_release = %s, 
-			views_week = %s, views_month = %s, views = %s
+		SET id_chapter = %s, path_segment = %s, time_release = %s, views_week = %s, views_month = %s, views = %s
 		WHERE id_manga = %s;
 		"""
-		data_tuple = (id_chapter, path_segment_chapter, path_segment, time_release, views_week, views_month, views, id_manga)
+		data_tuple = (id_chapter, path_segment, time_release, views_week, views_month, views, id_manga)
 		cursor.execute(sqlite_update_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Update chapter successfully data into table. {id_chapter}")
@@ -186,8 +184,7 @@ async def start_insert_list_chapter(_LINK_DATA_CHAPTER):
 
 		await insert_Chapter_Into_Table(id_chapter, path_segment_chapter, id_manga, time_release)
 		await insert_Image_Chapter_Into_Table(path_segment, id_chapter, image_chapter_upload, image_chapter_original)
-		await update_Manga_Into_Table(id_manga, id_chapter, path_segment_chapter, path_segment, time_release,
-										views_week, views_month, views)
+		await update_Manga_Into_Table(id_manga, id_chapter, path_segment, time_release, views_week, views_month, views)
 
 		print(len(data) - len(data) + i)
 		if i % 1000 == 0:
@@ -204,6 +201,6 @@ async def start():
 	await start_insert_list_manga(_LINK_DATA_MANGA)
 	await start_insert_list_chapter(_LINK_DATA_CHAPTER)
 
-#password = ""
+# password = ""
 password = "mcso@123#@!"
 asyncio.run(start())
