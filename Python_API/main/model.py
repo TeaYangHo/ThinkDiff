@@ -57,30 +57,47 @@ class Reviews_Manga(db.Model):
 	link_user = db.Column(db.Text)
 	time_review = db.Column(db.Text)
 
-class ListManga(db.Model):
-	__tablename__ = "LISTMANGA"
+class List_Manga(db.Model):
+	__tablename__ = "List_Manga"
 	__bind_key__ = "MANGASYSTEM"
-	id_manga = db.Column(db.String(500), primary_key=True)
+	id_manga_original = db.Column(db.String(500), primary_key=True)
+	id_manga_system = db.Column(db.Text)
 	title_manga = db.Column(db.Text)
 	descript_manga = db.Column(db.Text)
-	link_image_poster_link_upload = db.Column(db.Text)
-	link_image_poster_link_goc = db.Column(db.Text)
-	link_detail_manga = db.Column(db.Text)
-	list_categories = db.Column(db.Text)
-	list_chapter = db.Column(db.Text)
+	poster_upload = db.Column(db.Text)
+	poster_original = db.Column(db.Text)
+	detail_manga = db.Column(db.Text)
+	categories = db.Column(db.Text)
+	chapters = db.Column(db.Text)
 	rate = db.Column(db.Text)
-	so_luong_view = db.Column(db.Text)
+	views_original = db.Column(db.Text)
 	status = db.Column(db.Text)
-	tac_gia = db.Column(db.Text)
+	author = db.Column(db.Text)
 	id_server = db.Column(db.Text)
+
+class List_Chapter(db.Model):
+	__tablename__ = "List_Chapter"
+	__bind_key__ = "MANGASYSTEM"
+	id_chapter_original = db.Column(db.String(500), primary_key=True)
+	title_chapter = db.Column(db.Text)
+	id_manga_original = db.Column(db.String(500), db.ForeignKey('List_Manga.id_manga_original'))
+	id_manga_system = db.Column(db.Text)
+	image_chapter_upload = db.Column(db.Text)
+	image_chapter_original = db.Column(db.Text)
 	time_release = db.Column(db.Text)
 
-class ListChapter(db.Model):
-	__tablename__ = "LISTCHAPTER"
+class Manga_Update(db.Model):
+	__tablename__ = "Manga_Update"
 	__bind_key__ = "MANGASYSTEM"
-	id_chapter = db.Column(db.String(500), primary_key=True)
-	chapter = db.Column(db.Text)
-	id_manga = db.Column(db.String(500), db.ForeignKey('LISTMANGA.id_manga'))
-	list_image_chapter_da_upload = db.Column(db.Text)
-	list_image_chapter_server_goc = db.Column(db.Text)
-	thoi_gian_release = db.Column(db.Text)
+	id_manga_original = db.Column(db.String(500), db.ForeignKey('List_Manga.id_manga_original'), primary_key=True)
+	id_manga_system = db.Column(db.Text)
+	title_manga = db.Column(db.Text)
+	poster = db.Column(db.Text)
+	categories = db.Column(db.Text)
+	rate = db.Column(db.Text)
+	views_week = db.Column(db.Integer, default=0)
+	views_month = db.Column(db.Integer, default=0)
+	views = db.Column(db.Integer, default=0)
+	id_chapter_original = db.Column(db.String(500), db.ForeignKey('List_Chapter.id_chapter_original'))
+	title_chapter = db.Column(db.Text)
+	time_release = db.Column(db.Text)
