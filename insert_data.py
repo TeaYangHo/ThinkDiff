@@ -1,5 +1,6 @@
 import asyncio, json, random
 import mysql.connector
+from urllib.parse import unquote
 
 def conver_url(url):
 	if url.endswith(".html"):
@@ -10,6 +11,7 @@ def conver_url(url):
 		result = url.split("/")[-2]
 	else:
 		result = url.split("/")[-1]
+	result = unquote(result)
 	return result
 
 async def insertMangaIntoTable(id_manga, path_segment_manga, title_manga, descript_manga, poster_upload, poster_original,
