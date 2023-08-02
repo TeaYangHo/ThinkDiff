@@ -87,9 +87,10 @@ async def rank_manga_week():
 	data_rank_manga_week = []
 	rank_manga_week = Manga_Update.query.order_by(Manga_Update.views_week.desc()).limit(20).all()
 	for rank in rank_manga_week:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga_original": rank.id_manga_original,
-			"id_manga_system": rank.id_manga_system,
+			"id_manga": rank.id_manga,
+			"url_manga": await make_link(localhost, rank.path_segment_manga),
 			"title_manga": rank.title_manga,
 			"image_poster": rank.poster,
 			"categories": rank.categories,
@@ -103,9 +104,10 @@ async def rank_manga_month():
 	data_rank_manga_month = []
 	rank_manga_month = Manga_Update.query.order_by(Manga_Update.views_month.desc()).limit(20).all()
 	for rank in rank_manga_month:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga_original": rank.id_manga_original,
-			"id_manga_system": rank.id_manga_system,
+			"id_manga": rank.id_manga,
+			"url_manga": await make_link(localhost, rank.path_segment_manga),
 			"title_manga": rank.title_manga,
 			"image_poster": rank.poster,
 			"categories": rank.categories,
@@ -119,9 +121,10 @@ async def rank_manga_year():
 	data_rank_manga_year = []
 	rank_manga_year = Manga_Update.query.order_by(Manga_Update.views.desc()).limit(20).all()
 	for rank in rank_manga_year:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga_original": rank.id_manga_original,
-			"id_manga_system": rank.id_manga_system,
+			"id_manga": rank.id_manga,
+			"url_manga": await make_link(localhost, rank.path_segment_manga),
 			"title_manga": rank.title_manga,
 			"image_poster": rank.poster,
 			"categories": rank.categories,
@@ -136,14 +139,17 @@ async def comedy_comics():
 	comedy_comics = Manga_Update.query.filter(Manga_Update.categories.like('%Comedy%')).\
 		order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
 	for comedy_comic in comedy_comics:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga": comedy_comic.id_manga_original,
-			"id_manga_system": comedy_comic.id_manga_system,
+			"id_manga": comedy_comic.id_manga,
+			"url_manga": await make_link(localhost, comedy_comic.path_segment_manga),
 			"title_manga": comedy_comic.title_manga,
 			"image_poster": comedy_comic.poster,
 			"rate": comedy_comic.rate,
 			"chapter_new": comedy_comic.title_chapter,
-			"id_chapter": comedy_comic.id_chapter_original,
+			"id_chapter": comedy_comic.id_chapter,
+			"url_chapter": await make_link(localhost,
+										   f"{comedy_comic.path_segment_manga}/{comedy_comic.path_segment_chapter}"),
 			"time_release": comedy_comic.time_release
 		}
 		data_comedy_comics.append(data)
@@ -154,13 +160,16 @@ async def free_comics():
 	data_free_comics = []
 	free_comics = Manga_Update.query.order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
 	for free_comic in free_comics:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga": free_comic.id_manga_original,
+			"id_manga": free_comic.id_manga,
+			"url_manga": await make_link(localhost, free_comic.path_segment_manga),
 			"title_manga": free_comic.title_manga,
 			"image_poster_link_goc": free_comic.poster,
 			"rate": free_comic.rate,
 			"chapter_new": free_comic.title_chapter,
-			"id_chapter": free_comic.id_chapter_original,
+			"id_chapter": free_comic.id_chapter,
+			"url_chapter": await make_link(localhost, f"{free_comic.path_segment_manga}/{free_comic.path_segment_chapter}"),
 			"time_release": free_comic.time_release
 		}
 		data_free_comics.append(data)
@@ -172,13 +181,17 @@ async def cooming_soon_comics():
 	cooming_soon_comics = Manga_Update.query.\
 		order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
 	for cooming_soon_comic in cooming_soon_comics:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga_original": cooming_soon_comic.id_manga_original,
+			"id_manga": cooming_soon_comic.id_manga,
+			"url_manga": await make_link(localhost, cooming_soon_comic.path_segment_manga),
 			"title_manga": cooming_soon_comic.title_manga,
 			"image_poster_link_goc": cooming_soon_comic.poster,
 			"rate": cooming_soon_comic.rate,
 			"chapter_new": cooming_soon_comic.title_chapter,
-			"id_chapter": cooming_soon_comic.id_chapter_original,
+			"id_chapter": cooming_soon_comic.id_chapter,
+			"url_chapter": await make_link(localhost,
+										   f"{cooming_soon_comic.path_segment_manga}/{cooming_soon_comic.path_segment_chapter}"),
 			"time_release": cooming_soon_comic.time_release
 		}
 		data_cooming_soon_comics.append(data)
@@ -190,13 +203,17 @@ async def recommended_comics():
 	recommended_comics = Manga_Update.query.\
 		order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
 	for recommended_comic in recommended_comics:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga": recommended_comic.id_manga_original,
+			"id_manga": recommended_comic.id_manga,
+			"url_manga": await make_link(localhost, recommended_comic.path_segment_manga),
 			"title_manga": recommended_comic.title_manga,
 			"image_poster_link_goc": recommended_comic.poster,
 			"rate": recommended_comic.rate,
 			"chapter_new": recommended_comic.title_chapter,
-			"id_chapter": recommended_comic.id_chapter_original,
+			"id_chapter": recommended_comic.id_chapter,
+			"url_chapter": await make_link(localhost,
+										   f"{recommended_comic.path_segment_manga}/{recommended_comic.path_segment_chapter}"),
 			"time_release": recommended_comic.time_release
 		}
 		data_recommended_comics.append(data)
@@ -208,13 +225,17 @@ async def recent_comics():
 	recent_comics = Manga_Update.query.\
 		order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
 	for recent_comic in recent_comics:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga": recent_comic.id_manga_original,
+			"id_manga": recent_comic.id_manga,
+			"url_manga": await make_link(localhost, recent_comic.path_segment_manga),
 			"title_manga": recent_comic.title_manga,
 			"image_poster_link_goc": recent_comic.poster,
 			"rate": recent_comic.rate,
 			"chapter_new": recent_comic.title_chapter,
-			"id_chapter": recent_comic.id_chapter_original,
+			"id_chapter": recent_comic.id_chapter,
+			"url_chapter": await make_link(localhost,
+										   f"{recent_comic.path_segment_manga}/{recent_comic.path_segment_chapter}"),
 			"time_release": recent_comic.time_release
 		}
 		data_recent_comics.append(data)
@@ -227,13 +248,17 @@ async def new_release_comics():
 	new_release_comics = Manga_Update.query.\
 		order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
 	for new_release_comic in new_release_comics:
+		localhost = await split_join(request.url)
 		data = {
-			"id_manga": new_release_comic.id_manga_original,
+			"id_manga": new_release_comic.id_manga,
+			"url_manga": await make_link(localhost, new_release_comic.path_segment_manga),
 			"title_manga": new_release_comic.title_manga,
 			"image_poster_link_goc": new_release_comic.poster,
 			"rate": new_release_comic.rate,
 			"chapter_new": new_release_comic.title_chapter,
-			"id_chapter": new_release_comic.id_chapter_original,
+			"id_chapter": new_release_comic.id_chapter,
+			"url_chapter": await make_link(localhost,
+										   f"{new_release_comic.path_segment_manga}/{new_release_comic.path_segment_chapter}"),
 			"time_release": new_release_comic.time_release
 		}
 		data_new_release_comics.append(data)
