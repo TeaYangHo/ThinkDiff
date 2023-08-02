@@ -201,14 +201,17 @@ async def forgot_password_confirm(token):
 
 @app.route("/")
 async def get_home():
-	data_user, data_news, data_reviews_manga, data_reviews_anime, data_rank_manga_week, data_rank_manga_month,\
-	data_rank_manga_year, data_comedy_comics, data_free_comics, data_cooming_soon_comics, data_recommended_comics, \
+	#data_user,
+	#user_new(),
+	data_news, data_reviews_manga, data_reviews_anime, data_rank_manga_week, data_rank_manga_month,data_rank_manga_year,\
+	data_comedy_comics, data_free_comics, data_cooming_soon_comics, data_recommended_comics, \
 	data_recent_comics, data_new_release_comics \
-	= await asyncio.gather(user_new(), anime_manga_news(), reviews_manga(), reviews_anime(), rank_manga_week(), rank_manga_month(),
-							rank_manga_year(), comedy_comics(), free_comics(), cooming_soon_comics(), recommended_comics(),
+	= await asyncio.gather(anime_manga_news(), reviews_manga(), reviews_anime(), rank_manga_week(), rank_manga_month(),rank_manga_year(),
+							 comedy_comics(), free_comics(), cooming_soon_comics(), recommended_comics(),
 							recent_comics(), new_release_comics())
 
-	return jsonify(User_New=data_user,
+	return jsonify(
+				# User_New=data_user,
 				Anime_Manga_News=data_news,
 				Reviews_Manga=data_reviews_manga,
 				Reviews_Anime=data_reviews_anime,
@@ -221,6 +224,36 @@ async def get_home():
 				Recommended_Comics=data_recommended_comics,
 				Recent_Comics=data_recent_comics,
 				New_Release_Comics=data_new_release_comics)
+
+
+
+@app.route('/comic/<id_manga_system>/')
+async def get_manga(id_manga_system):
+	manga = List_Manga.query.filter_by(id_manga_system=id_manga_system).first()
+	return jsonify(
+		TitleManga=manga.title_manga,
+		DescriptManga=manga.descript_manga,
+		Poster=manga.poster_original,
+		Categories=manga.categories,
+		Chapters=manga.chapters,
+		Rate=manga.rate,
+		Views=manga.views_original,
+		Status=manga.status,
+		Author=manga.author
+	)
+
+@app.route('/comic/<id_manga_system>/<title_chapter>/')
+async def get_chapter(id_manga_system, title_chapter):
+	chapters = List_Chapter.query.filter_by(id_manga_system=id_manga_system, title_chapter=title_chapter).first()
+	list_link_img = chapters.image_chapter_original.split(',')
+	id_manga_original = chapters.id_manga_original
+	chapter = Manga_Update.query.filter_by(id_manga_original=id_manga_original).first()
+	chapter.views_week += 1
+	chapter.views_month += 1
+	chapter.views += 1
+	db.session.commit()
+	return jsonify(Chapter=list_link_img)
+
 
 
 @app.route('/get_full_img_chapter', methods=['GET', 'POST'])
