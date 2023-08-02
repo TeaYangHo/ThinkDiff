@@ -17,46 +17,46 @@ async def insertMangaIntoTable(id_manga, path_segment_manga, title_manga, descri
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, db="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
-		sqlite_insert_with_param = """
-		REPLACE INTO List_Manga
+		mysql_insert_with_param = """
+		INSERT INTO List_Manga
 		(id_manga, path_segment_manga, title_manga, descript_manga, poster_upload, poster_original,
 							detail_manga, categories, chapters, rate, views_original, status, author, id_server) 
 		VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
 		"""
 		data_tuple = (id_manga, path_segment_manga, title_manga, descript_manga, poster_upload, poster_original,
 							detail_manga, categories, chapters, rate, views_original, status, author, id_server)
-		cursor.execute(sqlite_insert_with_param, data_tuple)
+		cursor.execute(mysql_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted manga successfully data into table. {id_manga}")
 	except mysql.connector.Error as error:
-		print(f"Failed to insert Python variable into sqlite table. {id_manga}", error)
+		print(f"Failed to insert Python variable into mysql table. {id_manga}", error)
 
 	finally:
 		if connect_mysql:
 			connect_mysql.close()
-			print("The SQLite connection is closed")
+			print("The mysql connection is closed")
 
 
 async def insert_Manga_Update_Into_Table(id_manga, path_segment_manga, title_manga, poster, categories, rate):
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, db="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
-		sqlite_insert_with_param = """
+		mysql_insert_with_param = """
 		INSERT INTO Manga_Update
 		(id_manga, path_segment_manga, title_manga, poster, categories, rate) 
 		VALUES (%s, %s, %s, %s, %s, %s);
 		"""
 		data_tuple = (id_manga, path_segment_manga, title_manga, poster, categories, rate)
-		cursor.execute(sqlite_insert_with_param, data_tuple)
+		cursor.execute(mysql_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted manga successfully data into table. {id_manga}")
 	except mysql.connector.Error as error:
-		print(f"Failed to insert Python variable into sqlite table. {id_manga}", error)
+		print(f"Failed to insert Python variable into mysql table. {id_manga}", error)
 
 	finally:
 		if connect_mysql:
 			connect_mysql.close()
-			print("The SQLite connection is closed")
+			print("The mysql connection is closed")
 
 
 async def start_insert_list_manga(_LINK_DATA_MANGA):
@@ -100,65 +100,65 @@ async def insert_Chapter_Into_Table(id_chapter, path_segment_chapter, id_manga, 
 	cursor = connect_mysql.cursor()
 
 	try:
-		sqlite_insert_with_param = """
+		mysql_insert_with_param = """
 		INSERT INTO List_Chapter
 		(id_chapter, path_segment_chapter, id_manga, time_release)
 		VALUES (%s, %s, %s, %s);
 		"""
 		data_tuple = (id_chapter, path_segment_chapter, id_manga, time_release)
-		cursor.execute(sqlite_insert_with_param, data_tuple)
+		cursor.execute(mysql_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted chapter successfully data into table. {id_chapter}")
 		cursor.close()
 	except mysql.connector.Error as error:
-		print(f"Failed to insert Python variable into sqlite table. {id_chapter}", error)
+		print(f"Failed to insert Python variable into mysql table. {id_chapter}", error)
 	finally:
 		if connect_mysql:
 			connect_mysql.close()
-			print("The SQLite connection is closed")
+			print("The mysql connection is closed")
 
 async def insert_Image_Chapter_Into_Table(path_segment, id_chapter, image_chapter_upload, image_chapter_original):
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 
 	try:
-		sqlite_insert_with_param = """
+		mysql_insert_with_param = """
 		INSERT INTO Imaga_Chapter
 		(path_segment, id_chapter, image_chapter_upload, image_chapter_original)
 		VALUES (%s, %s, %s, %s);
 		"""
 		data_tuple = (path_segment, id_chapter, image_chapter_upload, image_chapter_original)
-		cursor.execute(sqlite_insert_with_param, data_tuple)
+		cursor.execute(mysql_insert_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Inserted image chapter successfully data into table. {id_chapter}")
 		cursor.close()
 	except mysql.connector.Error as error:
-		print(f"Failed to insert Python variable into sqlite table. {id_chapter}", error)
+		print(f"Failed to insert Python variable into mysql table. {id_chapter}", error)
 	finally:
 		if connect_mysql:
 			connect_mysql.close()
-			print("The SQLite connection is closed")
+			print("The mysql connection is closed")
 			
 async def update_Manga_Into_Table(id_manga, id_chapter, path_segment, time_release, views_week, views_month, views):
 	connect_mysql = mysql.connector.connect(host="localhost", user="root", password=password, database="MANGASYSTEM")
 	cursor = connect_mysql.cursor()
 	try:
-		sqlite_update_with_param = """
+		mysql_update_with_param = """
 		UPDATE Manga_Update
 		SET id_chapter = %s, path_segment = %s, time_release = %s, views_week = %s, views_month = %s, views = %s
 		WHERE id_manga = %s;
 		"""
 		data_tuple = (id_chapter, path_segment, time_release, views_week, views_month, views, id_manga)
-		cursor.execute(sqlite_update_with_param, data_tuple)
+		cursor.execute(mysql_update_with_param, data_tuple)
 		connect_mysql.commit()
 		print(f"Update chapter successfully data into table. {id_chapter}")
 		cursor.close()
 	except mysql.connector.Error as error:
-		print(f"Failed to Update Python variable into sqlite table. {id_chapter}", error)
+		print(f"Failed to Update Python variable into mysql table. {id_chapter}", error)
 	finally:
 		if connect_mysql:
 			connect_mysql.close()
-			print("The SQLite connection is closed")
+			print("The mysql connection is closed")
 
 async def start_insert_list_chapter(_LINK_DATA_CHAPTER):
 	with open(_LINK_DATA_CHAPTER, 'r', encoding='utf-8') as f:
