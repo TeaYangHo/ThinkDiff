@@ -198,20 +198,17 @@ async def forgot_password_confirm(token):
 	db.session.commit()
 	return {"message": "Confirm successfully. Try to login"}
 
-
 @app.route("/")
 async def get_home():
-	#data_user,
-	#user_new(),
 	data_news, data_reviews_manga, data_reviews_anime, data_rank_manga_week, data_rank_manga_month,data_rank_manga_year,\
 	data_comedy_comics, data_free_comics, data_cooming_soon_comics, data_recommended_comics, \
-	data_recent_comics, data_new_release_comics \
+	data_recent_comics, data_new_release_comics, data_user\
 	= await asyncio.gather(anime_manga_news(), reviews_manga(), reviews_anime(), rank_manga_week(), rank_manga_month(),rank_manga_year(),
 							 comedy_comics(), free_comics(), cooming_soon_comics(), recommended_comics(),
-							recent_comics(), new_release_comics())
+							recent_comics(), new_release_comics(), user_new())
 
 	return jsonify(
-				# User_New=data_user,
+				User_New=data_user,
 				Anime_Manga_News=data_news,
 				Reviews_Manga=data_reviews_manga,
 				Reviews_Anime=data_reviews_anime,
@@ -227,40 +224,44 @@ async def get_home():
 
 
 
-@app.route('/comic/<id_manga_system>/')
-async def get_manga(id_manga_system):
-	manga = List_Manga.query.filter_by(id_manga_system=id_manga_system).first()
+@app.route('/manga/<path_segment_manga>/')
+async def get_manga(path_segment_manga):
+	manga = List_Manga.query.filter_by(path_segment_manga=path_segment_manga).first()
+
+	if manga == None:
+		return jsonify(msg="Manga doesn't exist!"), 404
+
+	localhost = await split_join(request.url)
+	chapters = await list_chapter(localhost, manga.id_manga, path_segment_manga)
+
 	return jsonify(
+		IdManga=manga.id_manga,
 		TitleManga=manga.title_manga,
 		DescriptManga=manga.descript_manga,
 		Poster=manga.poster_original,
 		Categories=manga.categories,
-		Chapters=manga.chapters,
 		Rate=manga.rate,
 		Views=manga.views_original,
 		Status=manga.status,
-		Author=manga.author
+		Author=manga.author,
+		Chapters=chapters
 	)
 
-@app.route('/comic/<id_manga_system>/<title_chapter>/')
-async def get_chapter(id_manga_system, title_chapter):
-	chapters = List_Chapter.query.filter_by(id_manga_system=id_manga_system, title_chapter=title_chapter).first()
-	list_link_img = chapters.image_chapter_original.split(',')
-	id_manga_original = chapters.id_manga_original
-	chapter = Manga_Update.query.filter_by(id_manga_original=id_manga_original).first()
-	chapter.views_week += 1
-	chapter.views_month += 1
-	chapter.views += 1
+@app.route('/manga/<path_segment_manga>/<path_segment_chapter>/')
+async def get_image_chapter(path_segment_manga, path_segment_chapter):
+	path_segment = f"{path_segment_manga}-{path_segment_chapter}"
+	chapters = Imaga_Chapter.query.filter_by(path_segment=path_segment).first()
+
+	if chapters == None:
+		return jsonify(msg="None"), 404
+
+	image_chapter = chapters.image_chapter_original.split(',')
+	chapter = List_Chapter.query.filter_by(id_chapter=chapters.id_chapter).first()
+	manga = Manga_Update.query.filter_by(id_manga=chapter.id_manga).first()
+
+	manga.views_week += 1
+	manga.views_month += 1
+	manga.views += 1
 	db.session.commit()
-	return jsonify(Chapter=list_link_img)
+	return jsonify(ImageChapter=image_chapter)
 
-
-
-@app.route('/get_full_img_chapter', methods=['GET', 'POST'])
-def get_full_img_chapter():
-	link_chapter = request.form.get("link-chapter")
-	chapters = ListChapter.query.filter_by(id_chapter=link_chapter).first()
-	list_link_img = chapters.list_image_chapter_server_goc.split(',')
-	dict_link_img = dict()
-	dict_link_img['list_img'] = list_link_img
-	return dict_link_img
