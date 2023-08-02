@@ -1,4 +1,4 @@
-from .model import db, Users, Profiles, Anime_Manga_News, Reviews_Manga, Reviews_Anime, ListManga, ListChapter
+from .model import db, Users, Profiles, Anime_Manga_News, Reviews_Manga, Reviews_Anime, List_Manga, List_Chapter, Manga_Update
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 from .form import RegisterForm, LoginForm, UserSettingForm, SettingPasswordForm, ForgotPasswordForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
