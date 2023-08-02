@@ -1,4 +1,6 @@
 from .model import db, Users, Profiles, Anime_Manga_News, Reviews_Manga, Reviews_Anime, List_Manga, List_Chapter, Manga_Update
+from .model import Imaga_Chapter
+
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 from .form import RegisterForm, LoginForm, UserSettingForm, SettingPasswordForm, ForgotPasswordForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -68,3 +70,24 @@ def convert_time(time_register):
 		time = register_date.strftime("%b %d, %I:%M %p")
 	return time
 
+async def list_chapter(localhost, id_manga, path_segment_manga):
+	querys = List_Chapter.query.filter_by(id_manga=id_manga).all()
+
+	if querys == None:
+		return jsonify(msg="None"), 404
+
+	chapters = []
+	for query in querys:
+		path_segment_chapter = query.path_segment_chapter
+		path = f"{localhost}/manga/{path_segment_manga}/{path_segment_chapter}"
+		chapters.append(path)
+	return chapters
+
+async def split_join(url):
+	url = url.split('/')
+	url = '/'.join(url[:3])
+	return url
+
+async def make_link(localhost, path):
+	url = f"{localhost}/manga/{path}"
+	return url
