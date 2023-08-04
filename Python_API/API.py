@@ -200,31 +200,36 @@ async def forgot_password_confirm(token):
 
 @app.route("/")
 async def get_home():
-	data_news, data_reviews_manga, data_reviews_anime, data_rank_manga_week, data_rank_manga_month,data_rank_manga_year,\
+	data_news, data_reviews_manga, data_reviews_anime, data_rank_manga_week, data_rank_manga_month, data_rank_manga_year, \
 	data_comedy_comics, data_free_comics, data_cooming_soon_comics, data_recommended_comics, \
-	data_recent_comics, data_new_release_comics, data_user\
-	= await asyncio.gather(anime_manga_news(), reviews_manga(), reviews_anime(), rank_manga_week(), rank_manga_month(),rank_manga_year(),
-							 comedy_comics(), free_comics(), cooming_soon_comics(), recommended_comics(),
-							recent_comics(), new_release_comics(), user_new())
+	data_recent_comics, data_new_release_comics, data_user = await asyncio.gather(
+		anime_manga_news(), reviews_manga(), reviews_anime(), rank_manga_week(), rank_manga_month(), rank_manga_year(),
+		comedy_comics(), free_comics(), cooming_soon_comics(), recommended_comics(),
+		recent_comics(), new_release_comics(), user_new()
+	)
 
-	return jsonify(
-				User_New=data_user,
-				Anime_Manga_News=data_news,
-				Reviews_Manga=data_reviews_manga,
-				Reviews_Anime=data_reviews_anime,
-				Rank_Comics_Week=data_rank_manga_week,
-				Rank_Comics_Month=data_rank_manga_month,
-				Rank_Comics_Year=data_rank_manga_year,
-				Comedy_Comics=data_comedy_comics,
-				Free_Comics=data_free_comics,
-				Cooming_Soon_Comics=data_cooming_soon_comics,
-				Recommended_Comics=data_recommended_comics,
-				Recent_Comics=data_recent_comics,
-				New_Release_Comics=data_new_release_comics)
+	result = [
+		{"id": 1, "type": 1, "name": "Recommended Comics", "data": data_recommended_comics},
+		{"id": 2, "type": 1, "name": "New Release Comics", "data": data_new_release_comics},
+		{"id": 3, "type": 1, "name": "Free Comics", "data": data_free_comics},
+		{"id": 4, "type": 1, "name": "Cooming Soon Comics", "data": data_cooming_soon_comics},
+		{"id": 5, "type": 1, "name": "Recent Comics", "data": data_recent_comics},
+		{"id": 6, "type": 1, "name": "Comedy Comics", "data": data_comedy_comics},
+
+		{"id": 7, "type": 2, "name": "Anime Manga News", "data": data_news},
+		{"id": 8, "type": 2, "name": "Reviews Manga", "data": data_reviews_manga},
+		{"id": 9, "type": 2, "name": "Reviews Anime", "data": data_reviews_anime},
+
+		{"id": 10, "type": 3, "name": "Rank Week", "data": data_rank_manga_week},
+		{"id": 11, "type": 3, "name": "Rank Month", "data": data_rank_manga_month},
+		{"id": 12, "type": 3, "name": "Rank Year", "data": data_rank_manga_year},
+
+		{"id": 13, "type": 4, "name": "User New", "data": data_user}
+	]
+	return jsonify(result)
 
 
-
-@app.route('/manga/<path_segment_manga>/')
+@app.route('/manga/<path:path_segment_manga>/')
 async def get_manga(path_segment_manga):
 	manga = List_Manga.query.filter_by(path_segment_manga=path_segment_manga).first()
 
