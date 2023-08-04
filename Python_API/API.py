@@ -121,14 +121,21 @@ async def user_setting():
 			pic_name = str(uuid.uuid1()) + "_" + pic_filename
 			saver = form.avatar_user.data
 			saver.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
-			imgbb = await upload_image(pic_name)
+
+			client = imgbbpy.AsyncClient(key_api_imgbb)
+			try:
+				image = await client.upload(file=f'{path_folder_images}{pic_name}')
+				imgbb = image.url
+			except Exception as e:
+				return jsonify(Error=str(e)), 400
+			finally:
+				await client.close()
+				path_image = f"{path_folder_images}{pic_name}"
+				os.remove(path_image)
+
 			profile_user.avatar_user = imgbb
 			db.session.commit()
-			try:
-				path_image = f"{path_folder_images}/{pic_name}"
-				os.remove(path_image)
-			except OSError as e:
-				jsonify(Error=e)
+
 			result = [
 				{"Name User": form.name_user.data},
 				{"Avatar User": imgbb},
@@ -138,9 +145,6 @@ async def user_setting():
 			]
 			return jsonify(message="User Updated Successfully!", data=result)
 	return jsonify(Error=form.errors), 400
-
-
-
 
 @app.route("/user/setting/password", methods=["PATCH", "POST"])
 @login_required
