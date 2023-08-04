@@ -104,7 +104,7 @@ def user(id_user):
 	else:
 		return jsonify(message="User does not exist"), 404
 
-@app.route("/user/setting", methods=["PATCH"])
+@app.route("/user/setting", methods=["PATCH", "POST"])
 @login_required
 async def user_setting():
 	form = UserSettingForm()
@@ -115,16 +115,34 @@ async def user_setting():
 		profile_user.year_birth = form.year_birth.data
 		profile_user.sex = form.sex.data
 		profile_user.introduction = form.introduction.data
-
 		if form.avatar_user.data:
 			avatar_file = form.avatar_user.data
 			pic_filename = secure_filename(avatar_file.filename)
 			pic_name = str(uuid.uuid1()) + "_" + pic_filename
 			saver = form.avatar_user.data
 			saver.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
-		db.session.commit()
+			imgbb = await upload_image(pic_name)
+			profile_user.avatar_user = imgbb
+			db.session.commit()
+			try:
+				path_image = f"{path_folder_images}/{pic_name}"
+				os.remove(path_image)
+			except OSError as e:
+				jsonify(Error=e)
+			result = [
+				{"Name User": form.name_user.data},
+				{"Avatar User": imgbb},
+				{"Year Birth": form.year_birth.data},
+				{"Sex": form.sex.data},
+				{"Introduction": form.introduction.data},
+			]
+			return jsonify(message="User Updated Successfully!", data=result)
+	return jsonify(Error=form.errors), 400
 
-@app.route("/user/setting/password", methods=["PATCH"])
+
+
+
+@app.route("/user/setting/password", methods=["PATCH", "POST"])
 @login_required
 async def user_setting_password():
 	form = SettingPasswordForm()
@@ -164,7 +182,7 @@ async def setting_password_confirm(token):
 
 	return {"message": "Confirm successfully. Try to login"}
 
-@app.route("/forgot-password", methods=["PATCH"])
+@app.route("/forgot-password", methods=["PATCH", "POST"])
 async def forgot_password():
 	form = ForgotPasswordForm()
 	if form.validate_on_submit():
