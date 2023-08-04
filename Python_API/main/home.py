@@ -1,7 +1,6 @@
 # from .model import db, Users, Profiles, Anime_Manga_News, Reviews_Manga, Reviews_Anime, List_Manga, List_Chapter, Manga_Update
 from . import *
 
-# from . import *
 
 async def update_participation_time(id_user, participation_time):
 	profile = Profiles.query.filter_by(id_user=id_user).first()
@@ -17,7 +16,7 @@ async def user_new():
 		await update_participation_time(id_user, participation_time)
 
 	users_new = Profiles.query.join(Users, Profiles.id_user == Users.id_user)\
-		.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").asc()).limit(20).all()
+		.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").desc()).limit(20).all()
 
 	data_user = []
 	for user_new in users_new:
@@ -32,7 +31,8 @@ async def user_new():
 
 async def anime_manga_news():
 	data_news = []
-	news = Anime_Manga_News.query.order_by(func.STR_TO_DATE(Anime_Manga_News.time_news, "%b %d, %h:%i %p").desc()).limit(20).all()
+	news = Anime_Manga_News.query\
+		.order_by(func.STR_TO_DATE(Anime_Manga_News.time_news, "%b %d, %h:%i %p").desc()).limit(20).all()
 	for new in news:
 		data = {
 			"idNews": new.idNews,
@@ -50,8 +50,8 @@ async def anime_manga_news():
 #REVIEWS MANGA
 async def reviews_manga():
 	data_reviews_manga = []
-	reviews_manga = Reviews_Manga.query.order_by(func.STR_TO_DATE(Reviews_Manga.time_review, "%b %d, %Y")
-												.desc()).limit(20).all()
+	reviews_manga = Reviews_Manga.query\
+		.order_by(func.STR_TO_DATE(Reviews_Manga.time_review, "%b %d, %Y").desc()).limit(20).all()
 
 	for review in reviews_manga:
 		data = {
@@ -68,8 +68,8 @@ async def reviews_manga():
 # REVIEWS ANIME
 async def reviews_anime():
 	data_reviews_anime = []
-	reviews_manga = Reviews_Anime.query.order_by(func.STR_TO_DATE(Reviews_Anime.time_review, "%b %d, %Y")
-												.desc()).limit(20).all()
+	reviews_manga = Reviews_Anime.query.\
+		order_by(func.STR_TO_DATE(Reviews_Anime.time_review, "%b %d, %Y").desc()).limit(20).all()
 	for review in reviews_manga:
 		data = {
 			"idReview": review.idReview,
@@ -158,7 +158,8 @@ async def comedy_comics():
 #FREE COMICS
 async def free_comics():
 	data_free_comics = []
-	free_comics = Manga_Update.query.order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
+	free_comics = Manga_Update.query.\
+		order_by(func.STR_TO_DATE(Manga_Update.time_release, "%b %d, %Y").desc()).limit(20).all()
 	for free_comic in free_comics:
 		localhost = await split_join(request.url)
 		data = {
@@ -169,7 +170,8 @@ async def free_comics():
 			"rate": free_comic.rate,
 			"chapter_new": free_comic.title_chapter,
 			"id_chapter": free_comic.id_chapter,
-			"url_chapter": await make_link(localhost, f"{free_comic.path_segment_manga}/{free_comic.path_segment_chapter}"),
+			"url_chapter": await make_link(localhost,
+										f"{free_comic.path_segment_manga}/{free_comic.path_segment_chapter}"),
 			"time_release": free_comic.time_release
 		}
 		data_free_comics.append(data)
@@ -191,7 +193,7 @@ async def cooming_soon_comics():
 			"chapter_new": cooming_soon_comic.title_chapter,
 			"id_chapter": cooming_soon_comic.id_chapter,
 			"url_chapter": await make_link(localhost,
-										   f"{cooming_soon_comic.path_segment_manga}/{cooming_soon_comic.path_segment_chapter}"),
+										f"{cooming_soon_comic.path_segment_manga}/{cooming_soon_comic.path_segment_chapter}"),
 			"time_release": cooming_soon_comic.time_release
 		}
 		data_cooming_soon_comics.append(data)
@@ -213,7 +215,7 @@ async def recommended_comics():
 			"chapter_new": recommended_comic.title_chapter,
 			"id_chapter": recommended_comic.id_chapter,
 			"url_chapter": await make_link(localhost,
-										   f"{recommended_comic.path_segment_manga}/{recommended_comic.path_segment_chapter}"),
+										f"{recommended_comic.path_segment_manga}/{recommended_comic.path_segment_chapter}"),
 			"time_release": recommended_comic.time_release
 		}
 		data_recommended_comics.append(data)
@@ -235,7 +237,7 @@ async def recent_comics():
 			"chapter_new": recent_comic.title_chapter,
 			"id_chapter": recent_comic.id_chapter,
 			"url_chapter": await make_link(localhost,
-										   f"{recent_comic.path_segment_manga}/{recent_comic.path_segment_chapter}"),
+										f"{recent_comic.path_segment_manga}/{recent_comic.path_segment_chapter}"),
 			"time_release": recent_comic.time_release
 		}
 		data_recent_comics.append(data)
@@ -258,7 +260,7 @@ async def new_release_comics():
 			"chapter_new": new_release_comic.title_chapter,
 			"id_chapter": new_release_comic.id_chapter,
 			"url_chapter": await make_link(localhost,
-										   f"{new_release_comic.path_segment_manga}/{new_release_comic.path_segment_chapter}"),
+										f"{new_release_comic.path_segment_manga}/{new_release_comic.path_segment_chapter}"),
 			"time_release": new_release_comic.time_release
 		}
 		data_new_release_comics.append(data)
