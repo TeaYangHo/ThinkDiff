@@ -14,7 +14,7 @@ from flask_cors import CORS
 from flask_mail import *
 from threading import Thread
 import uuid, os, asyncio
-
+import imgbbpy
 
 app = Flask(__name__)
 CORS(app)
@@ -31,12 +31,12 @@ app.config["SQLAlCHEMY_TRACK_MODIFICATIONS"] = False
 
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 465
-app.config["MAIL_USERNAME"] = "buikhanhtoan_t64@hus.edu.vn"
-app.config["MAIL_PASSWORD"] = "mpkehnwnmcziryqs"
+app.config["MAIL_USERNAME"] = "dev.mangasocial@gmail.com"
+app.config["MAIL_PASSWORD"] = "deeiumkaqvsxiqwq"
 app.config["MAIL_USE_TLS"] = False
 app.config["MAIL_USE_SSL"] = True
 
-UPLOAD_FOLDER = r"images/"
+UPLOAD_FOLDER = r"/root/son/mangareader/python_api/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 app.config["WTF_CSRF_ENABLED"] = False  # Vô hiệu hóa CSRF
@@ -48,6 +48,9 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+path_folder_images = "/root/son/mangareader/python_api/"
+key_api_imgbb = f'687aae62e4c9739e646a37fca814c1bc'
 
 def convert_time(time_register):
 	time_now = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
@@ -70,6 +73,14 @@ def convert_time(time_register):
 		time = register_date.strftime("%b %d, %I:%M %p")
 	return time
 
+async def upload_image(image):
+	client = imgbbpy.AsyncClient(key_api_imgbb)
+	try:
+		image = await client.upload(file=f'{path_folder_images}{image}')
+		return image.url
+	finally:
+		await client.close()
+		
 async def list_chapter(localhost, id_manga, path_segment_manga):
 	querys = List_Chapter.query.filter_by(id_manga=id_manga).all()
 
