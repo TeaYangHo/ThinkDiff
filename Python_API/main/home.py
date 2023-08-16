@@ -269,18 +269,22 @@ async def new_release_comics():
 
 async def comment_new():
 	data_comment_news = []
-	comment_news = (Comments.query.
-					order_by(func.STR_TO_DATE(Comments.time_comment, "%H:%i:%S %d-%m-%Y").desc()).limit(10).all())
-
-	for comment_new in comment_news:
-		profile = Profiles.query.get_or_404(comment_new.id_user)
-		manga = List_Manga.query.filter_by(path_segment_manga=comment_new.path_segment_manga).first()
+	rank_manga = Manga_Update.query.order_by(Manga_Update.views.desc()).limit(10).all()
+	for i, rank in enumerate(rank_manga):
 		localhost = await split_join(request.url)
 
+		comment_new = (Comments.query.filter_by(path_segment_manga=rank.path_segment_manga)
+					.order_by(func.STR_TO_DATE(Comments.time_comment, "%H:%i:%S %d-%m-%Y").desc()).first())
+		if comment_new is None:
+			continue
+
+		profile = Profiles.query.get_or_404(comment_new.id_user)
+
 		count_comment = Comments.query.filter_by(path_segment_manga=comment_new.path_segment_manga,
-												 is_comment_reply=False).count()
+												is_comment_reply=False).count()
 		count_reply_comment = Comments.query.filter_by(path_segment_manga=comment_new.path_segment_manga,
-													   is_comment_reply=True).count()
+													is_comment_reply=True).count()
+
 		data = {
 			"id_user": comment_new.id_user,
 			"name_user": profile.name_user,
@@ -288,11 +292,10 @@ async def comment_new():
 			"id_comment": comment_new.id_comment,
 			"content": comment_new.content,
 			"time_comment": convert_time(comment_new.time_comment),
-			"title_manga": manga.title_manga,
+			"title_manga": rank.title_manga,
 			"url_manga": await make_link(localhost, comment_new.path_segment_manga),
 			"count_comment": count_comment,
 			"count_reply_comment": count_reply_comment
 		}
 		data_comment_news.append(data)
-
 	return data_comment_news
