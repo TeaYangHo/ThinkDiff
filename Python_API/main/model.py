@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 
 db = SQLAlchemy()
 
@@ -24,6 +25,33 @@ class Profiles(db.Model):
 	year_birth = db.Column(db.Integer)
 	sex = db.Column(db.String(11))
 	introduction = db.Column(db.Text)
+
+class Comments(db.Model):
+	__tablename__ = "COMMENTS"
+	id_comment = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	id_user = db.Column(db.Integer, db.ForeignKey('PROFILES.id_user'), nullable=False)
+	path_segment_manga = db.Column(db.TEXT)
+	path_segment_chapter = db.Column(db.TEXT)
+	content = db.Column(db.TEXT)
+	time_comment = db.Column(db.TEXT)
+	is_comment_reply = db.Column(db.Boolean, default=False)
+	reply_id_comment = db.Column(db.Integer, db.ForeignKey('COMMENTS.id_comment'))
+	is_edited_comment = db.Column(db.Boolean, default=False)
+
+class CommentDiary(db.Model):
+	__tablename__ = 'COMMENT_DIARY'
+	id_comment_diary = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	id_comment = db.Column(db.Integer)
+	content = db.Column(db.Text)
+	comment_type = db.Column(db.Enum('before', 'after', 'delete'))
+	time_comment = db.Column(db.Text)
+
+class LikesComment(db.Model):
+	__tablename__ = 'LIKES_COMMENT'
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	id_comment = db.Column(db.Integer, db.ForeignKey('COMMENTS.id_comment'))
+	id_user = db.Column(db.Integer, db.ForeignKey('PROFILES.id_user'))
+	status = db.Column(db.Enum('like', 'cancel'))
 
 class Anime_Manga_News(db.Model):
 	__tablename__ = "Anime_Manga_News"
@@ -73,6 +101,7 @@ class List_Manga(db.Model):
 	views_original = db.Column(db.Text)
 	status = db.Column(db.Text)
 	author = db.Column(db.Text)
+	comments = db.Column(db.Text)
 	id_server = db.Column(db.Text)
 
 class List_Chapter(db.Model):
