@@ -18,12 +18,12 @@ class UserSettingForm(FlaskForm):
 	name_user = StringField("Name", validators=[DataRequired()])
 	year_birth = StringField("Year Birth", validators=[DataRequired()])
 	sex = StringField("Sex", validators=[DataRequired()])
-	avatar_user = FileField('image', validators=[FileRequired(), FileAllowed(['jpg', 'png', "bmp"], 'Images only!')])
+	avatar_user = FileField("Images", validators=[FileRequired(), FileAllowed(["jpg", "png", "bmp"], "Images only!")])
 	introduction = StringField("Introduction", validators=[DataRequired()])
 	submit = SubmitField("Submit")
 
 class SettingPasswordForm(FlaskForm):
-	current_password = PasswordField("What's Your Password", validators=[DataRequired()])
+	current_password = PasswordField("Your Password", validators=[DataRequired()])
 	new_password = PasswordField("New Your Password", validators=[DataRequired(), Length(min=8)])
 	confirm_password = PasswordField("Confirm Your Password", validators=[DataRequired(), EqualTo("new_password", message="Passwords Must Match!")])
 	submit = SubmitField("Submit")
@@ -32,4 +32,8 @@ class ForgotPasswordForm(FlaskForm):
 	email = StringField("email", validators=[DataRequired(), Email()])
 	new_password = PasswordField("New Your Password", validators=[DataRequired(), Length(min=8)])
 	confirm_password = PasswordField("Confirm Your Password", validators=[DataRequired(), EqualTo("new_password", message="Passwords Must Match!")])
+	submit = SubmitField("Submit")
+
+class CommentsForm(FlaskForm):
+	content = StringField("Contents", validators=[DataRequired()])
 	submit = SubmitField("Submit")
