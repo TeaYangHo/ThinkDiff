@@ -1,8 +1,9 @@
 from .model import db, Users, Profiles, Anime_Manga_News, Reviews_Manga, Reviews_Anime, List_Manga, List_Chapter, Manga_Update
-from .model import Imaga_Chapter
+from .model import Imaga_Chapter, Comments, CommentDiary, LikesComment
+
+from .form import RegisterForm, LoginForm, UserSettingForm, SettingPasswordForm, ForgotPasswordForm, CommentsForm
 
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, get_jwt_identity, jwt_required
-from .form import RegisterForm, LoginForm, UserSettingForm, SettingPasswordForm, ForgotPasswordForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, request, jsonify, url_for
@@ -52,9 +53,9 @@ login_manager.login_view = "login"
 path_folder_images = "/root/son/mangareader/python_api/"
 key_api_imgbb = f'687aae62e4c9739e646a37fca814c1bc'
 
-def convert_time(time_register):
+def convert_time(time):
 	time_now = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-	register_date = datetime.strptime(time_register, "%H:%M:%S %d-%m-%Y")
+	register_date = datetime.strptime(time, "%H:%M:%S %d-%m-%Y")
 	current_date = datetime.strptime(time_now, "%H:%M:%S %d-%m-%Y")
 
 	participation_time = current_date - register_date
@@ -73,14 +74,10 @@ def convert_time(time_register):
 		time = register_date.strftime("%b %d, %I:%M %p")
 	return time
 
-async def upload_image(image):
-	client = imgbbpy.AsyncClient(key_api_imgbb)
-	try:
-		image = await client.upload(file=f'{path_folder_images}{image}')
-		return image.url
-	finally:
-		await client.close()
-		
+def send_async_email(msg):
+	with app.app_context():
+		mail.send(msg)
+
 async def list_chapter(localhost, id_manga, path_segment_manga):
 	querys = List_Chapter.query.filter_by(id_manga=id_manga).all()
 
@@ -93,6 +90,51 @@ async def list_chapter(localhost, id_manga, path_segment_manga):
 		path = f"{localhost}/manga/{path_segment_manga}/{path_segment_chapter}"
 		chapters.append(path)
 	return chapters
+
+async def get_comments(path_segment_manga):
+	def get_comment_data(comment):
+		like_count = LikesComment.query.filter_by(id_comment=comment.id_comment, status="like").count()
+		return {
+			"id_comment": comment.id_comment,
+			"user_id": comment.id_user,
+			"content": comment.content,
+			"chapter": comment.path_segment_chapter,
+			"time_comment": convert_time(comment.time_comment),
+			"likes": like_count,
+			"is_comment_reply": comment.is_comment_reply,
+			"is_edited_comment": comment.is_edited_comment,
+			"replies": get_replies(comment.id_comment)
+		}
+
+	def get_replies(parent_comment_id):
+		replies = (Comments.query.filter_by(reply_id_comment=parent_comment_id)
+				   .order_by(func.STR_TO_DATE(Comments.time_comment, "%H:%i:%S %d-%m-%Y").desc()).all())
+
+		reply_data = []
+		for reply in replies:
+			reply_data.append(get_comment_data(reply))
+		return reply_data
+
+	comments = (Comments.query.filter_by(path_segment_manga=path_segment_manga)
+				.order_by(func.STR_TO_DATE(Comments.time_comment, "%H:%i:%S %d-%m-%Y").desc()).all())
+
+	comments_info = []
+	for comment in comments:
+		if comment.is_comment_reply == False:
+			comments_info.append(get_comment_data(comment))
+
+	return comments_info
+
+async def delete_reply_comment(comment):
+	reply_comments = Comments.query.filter_by(reply_id_comment=comment.id_comment).all()
+	for reply_comment in reply_comments:
+		await delete_reply_comment(reply_comment)
+
+		comment_diary = CommentDiary(id_comment=reply_comment.id_comment, content=reply_comment.content,
+									 comment_type="delete", time_comment=reply_comment.time_comment)
+		db.session.add(comment_diary)
+		db.session.delete(reply_comment)
+		db.session.commit()
 
 async def split_join(url):
 	url = url.split('/')
