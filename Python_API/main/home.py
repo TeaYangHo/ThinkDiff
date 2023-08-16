@@ -8,7 +8,7 @@ async def update_participation_time(id_user, participation_time):
 	db.session.commit()
 
 async def user_new():
-	users = Users.query.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").desc()).limit(20).all()
+	users = Users.query.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").desc()).limit(12).all()
 	for user in users:
 		id_user = user.id_user
 		time_reg = user.time_register
@@ -16,7 +16,7 @@ async def user_new():
 		await update_participation_time(id_user, participation_time)
 
 	users_new = Profiles.query.join(Users, Profiles.id_user == Users.id_user)\
-		.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").desc()).limit(20).all()
+		.order_by(func.STR_TO_DATE(Users.time_register, "%H:%i:%S %d-%m-%Y").desc()).limit(12).all()
 
 	data_user = []
 	for user_new in users_new:
@@ -32,7 +32,7 @@ async def user_new():
 async def anime_manga_news():
 	data_news = []
 	news = Anime_Manga_News.query\
-		.order_by(func.STR_TO_DATE(Anime_Manga_News.time_news, "%b %d, %h:%i %p").desc()).limit(20).all()
+		.order_by(func.STR_TO_DATE(Anime_Manga_News.time_news, "%b %d, %h:%i %p").desc()).limit(7).all()
 	for new in news:
 		data = {
 			"idNews": new.idNews,
