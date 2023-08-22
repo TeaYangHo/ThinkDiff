@@ -1,6 +1,5 @@
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
 
 db = SQLAlchemy()
 
@@ -22,9 +21,10 @@ class Profiles(db.Model):
 	participation_time = db.Column(db.String(250))
 	number_reads = db.Column(db.Integer)
 	number_comments = db.Column(db.Integer)
-	year_birth = db.Column(db.Integer)
-	sex = db.Column(db.String(11))
+	date_of_birth = db.Column(db.Text)
+	gender = db.Column(db.String(11), default="undisclosed")
 	introduction = db.Column(db.Text)
+	job = db.Column(db.Text)
 
 class Comments(db.Model):
 	__tablename__ = "COMMENTS"
@@ -64,6 +64,17 @@ class Anime_Manga_News(db.Model):
 	images_poster = db.Column(db.Text)
 	descript_pro = db.Column(db.Text)
 	number_comment = db.Column(db.Integer)
+
+class Comment_News(db.Model):
+	__tablename__ = "Comment_News"
+	__bind_key__ = "MYANIMELIST"
+	id_comment = db.Column(db.String(500), primary_key=True)
+	id_news = db.Column(db.String(500))
+	# id_news = db.Column(db.String(500), db.ForeignKey('Anime_Manga_News.idNews'))
+	user_comment = db.Column(db.Text)
+	profile_user_comment = db.Column(db.Text)
+	comment = db.Column(db.Text)
+	time_comment = db.Column(db.Text)
 
 class Reviews_Anime(db.Model):
 	__tablename__ = "Reviews_Anime"
