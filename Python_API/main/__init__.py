@@ -25,10 +25,10 @@ CORS(app)
 
 app.config["SECRET_KEY"] = "24580101357900"
 app.config["SECURITY_PASSWORD_SALT"] = "24580201357900"
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:mcso%40123#%40!@localhost/MANGASOCIAL"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:ThinkDiff102@localhost/MANGASOCIAL"
 app.config["SQLALCHEMY_BINDS"] = {
-    "MYANIMELIST": "mysql://root:mcso%40123#%40!@localhost/MYANIMELIST",
-	"MANGASYSTEM": "mysql://root:mcso%40123#%40!@localhost/MANGASYSTEM"
+    "MYANIMELIST": "mysql://root:ThinkDiff102@localhost/MYANIMELIST",
+	"MANGASYSTEM": "mysql://root:ThinkDiff102@localhost/MANGASYSTEM"
 }
 
 app.config["SQLAlCHEMY_TRACK_MODIFICATIONS"] = False
