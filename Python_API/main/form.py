@@ -35,7 +35,3 @@ class ForgotPasswordForm(FlaskForm):
 	confirm_password = PasswordField("Confirm Your Password", validators=[DataRequired(), EqualTo("new_password", message="Passwords Must Match!")])
 	submit = SubmitField("Submit")
 
-class CommentsForm(FlaskForm):
-	content = StringField("Contents", validators=[DataRequired()])
-	# csrf_token = HiddenField()
-	submit = SubmitField("Submit")
