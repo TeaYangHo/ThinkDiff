@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, EqualTo, Length, Email
+from wtforms import StringField, SubmitField, PasswordField, DateField, SelectField, HiddenField
+from wtforms.validators import DataRequired, EqualTo, Length, Email, Regexp
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 
 
@@ -15,11 +15,12 @@ class LoginForm(FlaskForm):
 	submit = SubmitField("Submit")
 
 class UserSettingForm(FlaskForm):
-	name_user = StringField("Name", validators=[DataRequired()])
-	year_birth = StringField("Year Birth", validators=[DataRequired()])
-	sex = StringField("Sex", validators=[DataRequired()])
-	avatar_user = FileField("Images", validators=[FileRequired(), FileAllowed(["jpg", "png", "bmp"], "Images only!")])
-	introduction = StringField("Introduction", validators=[DataRequired()])
+	name_user = StringField("Name")
+	date_of_birth = DateField("Date of birth", format="%d/%m/%Y")
+	gender = SelectField("Gender", choices=[("female", "Female"), ("male", "Male"), ("undisclosed", "Undisclosed")])
+	job = StringField("Job")
+	avatar_user = FileField("Images", validators=[FileAllowed(["jpg", "png", "bmp"], "Images only!")])
+	introduction = StringField("Introduction")
 	submit = SubmitField("Submit")
 
 class SettingPasswordForm(FlaskForm):
@@ -36,4 +37,5 @@ class ForgotPasswordForm(FlaskForm):
 
 class CommentsForm(FlaskForm):
 	content = StringField("Contents", validators=[DataRequired()])
+	# csrf_token = HiddenField()
 	submit = SubmitField("Submit")
