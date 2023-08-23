@@ -235,7 +235,9 @@ def comments_diary(id_comment):
 def like_comment(id_comment):
 	id_user = current_user.id_user
 	like_status = LikesComment.query.filter_by(id_comment=id_comment, id_user=id_user).first()
-
+	comment = Comments.query.filter_by(id_comment=id_comment).first()
+	if not comment:
+		return jsonify(message="Comment does not exist!"), 404
 	if like_status:
 		if like_status.status == "like":
 			like_status.status = "cancel"
