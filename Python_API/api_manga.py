@@ -40,6 +40,11 @@ def get_image_chapter(path_segment_manga, path_segment_chapter):
 	chapter = List_Chapter.query.filter_by(id_chapter=chapters.id_chapter).first()
 	manga = Manga_Update.query.filter_by(id_manga=chapter.id_manga).first()
 
+	if current_user.is_authenticated:
+		id_user = current_user.id_user
+		profile = Profiles.query.filter_by(id_user=id_user).first()
+		profile.number_reads += 1
+
 	manga.views_week += 1
 	manga.views_month += 1
 	manga.views += 1
@@ -243,36 +248,3 @@ def like_comment(id_comment):
 		db.session.add(new_like)
 		db.session.commit()
 		return jsonify(message="Liked comment successfully")
-
-@app.route("/comm")
-def get_comment():
-	data_comment_news = []
-	rank_manga = Manga_Update.query.order_by(Manga_Update.views.desc()).limit(10).all()
-	for i, rank in enumerate(rank_manga):
-		localhost = split_join(request.url)
-
-		comment_new = (Comments.query.filter_by(path_segment_manga=rank.path_segment_manga)
-					.order_by(func.STR_TO_DATE(Comments.time_comment, "%H:%i:%S %d-%m-%Y").desc()).first())
-		if comment_new is None:
-			continue
-
-		profile = Profiles.query.get_or_404(comment_new.id_user)
-
-		count_comment = Comments.query.filter_by(path_segment_manga=comment_new.path_segment_manga,
-												is_comment_reply=False).count()
-		count_reply_comment = Comments.query.filter_by(path_segment_manga=comment_new.path_segment_manga,
-													is_comment_reply=True).count()
-		data = {
-			"id_user": comment_new.id_user,
-			"name_user": profile.name_user,
-			"avatar_user": profile.avatar_user,
-			"id_comment": comment_new.id_comment,
-			"content": comment_new.content,
-			"time_comment": convert_time(comment_new.time_comment),
-			"title_manga": rank.title_manga,
-			"url_manga": make_link(localhost, comment_new.path_segment_manga),
-			"count_comment": count_comment,
-			"count_reply_comment": count_reply_comment
-		}
-		data_comment_news.append(data)
-	return data_comment_news
