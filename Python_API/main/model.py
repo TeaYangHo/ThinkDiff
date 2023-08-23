@@ -19,8 +19,8 @@ class Profiles(db.Model):
 	name_user = db.Column(db.String(250), unique=True)
 	avatar_user = db.Column(db.String(250), default="https://ibb.co/PMqyby4")
 	participation_time = db.Column(db.String(250))
-	number_reads = db.Column(db.Integer)
-	number_comments = db.Column(db.Integer)
+	number_reads = db.Column(db.Integer, default=0)
+	number_comments = db.Column(db.Integer, default=0)
 	date_of_birth = db.Column(db.Text)
 	gender = db.Column(db.String(11), default="undisclosed")
 	introduction = db.Column(db.Text)
@@ -70,7 +70,6 @@ class Comment_News(db.Model):
 	__bind_key__ = "MYANIMELIST"
 	id_comment = db.Column(db.String(500), primary_key=True)
 	id_news = db.Column(db.String(500))
-	# id_news = db.Column(db.String(500), db.ForeignKey('Anime_Manga_News.idNews'))
 	user_comment = db.Column(db.Text)
 	profile_user_comment = db.Column(db.Text)
 	comment = db.Column(db.Text)
