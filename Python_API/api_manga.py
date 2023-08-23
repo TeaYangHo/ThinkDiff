@@ -73,6 +73,7 @@ def comment_chapter(path_segment_manga, path_segment_chapter):
 		time = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 		comment = Comments(id_user=id_user, path_segment_manga=path_segment_manga,
 							path_segment_chapter=path_segment_chapter, content=content, time_comment=time)
+		profile.number_comments += 1
 		db.session.add(comment)
 		db.session.commit()
 		responses = {
@@ -106,6 +107,7 @@ def comment_manga(path_segment_manga):
 		time = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 		comment = Comments(id_user=id_user, path_segment_manga=path_segment_manga,
 							path_segment_chapter=path_segment_chapter, content=content, time_comment=time)
+		profile.number_comments += 1
 		db.session.add(comment)
 		db.session.commit()
 		responses = {
