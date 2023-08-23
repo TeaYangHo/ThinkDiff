@@ -3,7 +3,7 @@ from .model import Imaga_Chapter, Comments, CommentDiary, LikesComment, Comment_
 from .form import RegisterForm, LoginForm, UserSettingForm, SettingPasswordForm, ForgotPasswordForm, CommentsForm
 
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, session
 from flask_caching import Cache
 from flask_cors import CORS
 from flask_mail import *
